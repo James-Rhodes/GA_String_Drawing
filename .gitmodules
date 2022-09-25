@@ -1,0 +1,6 @@
+[submodule "vendor/Genetic_Algorithm_Cpp"]
+	path = vendor/Genetic_Algorithm_Cpp
+	url = https://github.com/James-Rhodes/Genetic_Algorithm_Cpp
+[submodule "vendor/raylib"]
+	path = vendor/raylib
+	url = https://github.com/raysan5/raylib.git
