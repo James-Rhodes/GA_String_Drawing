@@ -1,4 +1,5 @@
-
+-- Originally written in this Repo https://github.com/raylib-extras/game-premake and mangled to 
+-- fit the needs of this project. I am very greatful to that repo for their hard work!
 function platform_defines()
     defines{"PLATFORM_DESKTOP"}
 
