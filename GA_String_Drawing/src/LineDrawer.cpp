@@ -115,6 +115,7 @@ double LineDraw::LineDrawer::CalculateFitness()
 
 void LineDraw::LineDrawer::LogParameters() const
 {
+	std::cout << "Fitness: " << fitness << std::endl;
 }
 
 void LineDraw::LineDrawer::Draw() const
