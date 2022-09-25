@@ -18,6 +18,12 @@ int main()
     SetTargetFPS(60); // Set our game to run at 60 frames-per-second
 
     Texture2D textureToApproximate = GenerateTextureToApproximate(IMAGE_PATH);
+    Image imageToApproximate = LoadImageFromTexture(textureToApproximate);
+    ImageFlipVertical(&imageToApproximate);
+    ExportImage(imageToApproximate,"results/Expected_Output.png"); // Save the result we want the GA to Approximate
+
+    UnloadImage(imageToApproximate);
+    //UnloadTexture(textureToApproximate);
     ////--------------------------------------------------------------------------------------
 
     //// Main game loop
