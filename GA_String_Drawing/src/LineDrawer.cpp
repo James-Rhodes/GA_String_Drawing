@@ -2,6 +2,7 @@
 
 std::array<Vector2, CIRCLE_RESOLUTION> LineDraw::LineDrawer::s_lookupTable;
 Color* LineDraw::pixelsToApproximate = nullptr;
+RenderTexture LineDraw::intermediateRender;
 
 void LineDraw::LineDrawer::Init()
 {
@@ -50,9 +51,9 @@ void LineDraw::LineDrawer::LogParameters() const
 
 void LineDraw::LineDrawer::Draw() const
 {
-	for (Vector2 pt : s_lookupTable) {
-		DrawCircleV(pt, 2, RED);
-	}
+	//for (Vector2 pt : s_lookupTable) {
+	//	DrawCircleV(pt, 2, RED);
+	//} // Draw Lookup Table
 
 	for (size_t i = 0; i < m_lineIndices.size(); i++) {
 		DrawLineEx(s_lookupTable[m_lineIndices[i].ptAIndex], s_lookupTable[m_lineIndices[i].ptBIndex], LINE_WIDTH, m_colors[i]);

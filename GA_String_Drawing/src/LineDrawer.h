@@ -14,6 +14,8 @@ namespace LineDraw {
 
     extern Color* pixelsToApproximate;
 
+    extern RenderTexture2D intermediateRender;
+
     struct LineIndices {
         int ptAIndex = -1;
         int ptBIndex = -1;

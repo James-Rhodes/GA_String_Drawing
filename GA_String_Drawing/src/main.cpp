@@ -25,6 +25,8 @@ int main()
     UnloadImage(imageToApproximate);
     LineDraw::LineDrawer test;
     test.Init();
+
+    LineDraw::intermediateRender = LoadRenderTexture(screenWidth,screenHeight);
     //UnloadTexture(textureToApproximate);
     ////--------------------------------------------------------------------------------------
 
