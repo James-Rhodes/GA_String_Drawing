@@ -42,4 +42,5 @@ bin-int/
 *.out
 *.app
 
+GA_String_Drawing/results/*.png
 !premake/premake5.exe
