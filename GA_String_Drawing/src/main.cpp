@@ -23,10 +23,17 @@ int main()
     ExportImage(imageToApproximate,"results/Expected_Output.png"); // Save the result we want the GA to Approximate
     LineDraw::pixelsToApproximate = LoadImageColors(imageToApproximate); // Global (sorry) variable for Line Drawers to try and approximate
     UnloadImage(imageToApproximate);
+
     LineDraw::LineDrawer test;
     test.Init();
 
     LineDraw::intermediateRender = LoadRenderTexture(screenWidth,screenHeight);
+
+    LineDraw::currentRender = LoadRenderTexture(screenWidth, screenHeight);
+    BeginTextureMode(LineDraw::currentRender);
+    ClearBackground(BACKGROUND_COLOR); // Initialise current render with black screen
+    EndTextureMode();
+
     //UnloadTexture(textureToApproximate);
     ////--------------------------------------------------------------------------------------
 
@@ -47,6 +54,7 @@ int main()
 
         DrawTextureRec(textureToApproximate, { 0,0,(float)textureToApproximate.width,-(float)textureToApproximate.height }, {0,0},WHITE);
         test.Draw();
+
         DrawFPS(10, 10);
 
         EndDrawing();

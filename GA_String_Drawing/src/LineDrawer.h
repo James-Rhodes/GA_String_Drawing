@@ -7,7 +7,7 @@
 #define CIRCLE_RESOLUTION 256
 #define CIRCLE_RADIUS 200
 #define NUM_LINES 10
-
+#define BACKGROUND_COLOR BLACK
 #define LINE_WIDTH 2
 
 namespace LineDraw {
@@ -15,6 +15,8 @@ namespace LineDraw {
     extern Color* pixelsToApproximate;
 
     extern RenderTexture2D intermediateRender;
+    extern RenderTexture2D currentRender;
+
 
     struct LineIndices {
         int ptAIndex = -1;

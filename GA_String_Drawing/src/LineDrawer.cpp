@@ -3,6 +3,8 @@
 std::array<Vector2, CIRCLE_RESOLUTION> LineDraw::LineDrawer::s_lookupTable;
 Color* LineDraw::pixelsToApproximate = nullptr;
 RenderTexture LineDraw::intermediateRender;
+RenderTexture LineDraw::currentRender;
+
 
 void LineDraw::LineDrawer::Init()
 {
