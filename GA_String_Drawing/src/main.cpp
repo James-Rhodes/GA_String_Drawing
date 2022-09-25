@@ -23,6 +23,8 @@ int main()
     ExportImage(imageToApproximate,"results/Expected_Output.png"); // Save the result we want the GA to Approximate
     LineDraw::pixelsToApproximate = LoadImageColors(imageToApproximate); // Global (sorry) variable for Line Drawers to try and approximate
     UnloadImage(imageToApproximate);
+    LineDraw::LineDrawer test;
+    test.Init();
     //UnloadTexture(textureToApproximate);
     ////--------------------------------------------------------------------------------------
 
@@ -31,15 +33,18 @@ int main()
     {
         //    // Update
         //    //----------------------------------------------------------------------------------
-
+        if (IsKeyPressed(KEY_SPACE)) {
+            test.Init();
+        }
         //    //----------------------------------------------------------------------------------
         //    // Draw
         //    //----------------------------------------------------------------------------------
         BeginDrawing();
 
-        ClearBackground(RAYWHITE);
+        ClearBackground(BLACK);
 
         DrawTextureRec(textureToApproximate, { 0,0,(float)textureToApproximate.width,-(float)textureToApproximate.height }, {0,0},WHITE);
+        test.Draw();
         DrawFPS(10, 10);
 
         EndDrawing();

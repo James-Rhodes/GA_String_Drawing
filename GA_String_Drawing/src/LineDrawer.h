@@ -2,15 +2,22 @@
 
 #include "PopulationMember.hpp"
 #include <iostream>
+#include <array>
 #include "raylib.h"
 #define CIRCLE_RESOLUTION 256
 #define CIRCLE_RADIUS 200
+#define NUM_LINES 10
 
 #define LINE_WIDTH 2
 
 namespace LineDraw {
 
-    Color* pixelsToApproximate = nullptr;
+    extern Color* pixelsToApproximate;
+
+    struct LineIndices {
+        int ptAIndex = -1;
+        int ptBIndex = -1;
+    };
 
     class LineDrawer : public GA_Cpp::PopulationMember<LineDrawer> {
     public:
@@ -25,5 +32,13 @@ namespace LineDraw {
         double CalculateFitness() override;
 
         void LogParameters() const override;
+
+        void Draw() const;
+
+
+    private:
+        static std::array<Vector2, CIRCLE_RESOLUTION> s_lookupTable; // Look up for all LineDrawers for positions of lines
+        std::array<Color,NUM_LINES> m_colors;
+        std::array<LineIndices,NUM_LINES> m_lineIndices;
     };
 }
