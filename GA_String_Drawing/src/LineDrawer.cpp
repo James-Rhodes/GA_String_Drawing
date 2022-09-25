@@ -44,7 +44,47 @@ void LineDraw::LineDrawer::Mutate(float mutationRate)
 
 double LineDraw::LineDrawer::CalculateFitness()
 {
-	return 0.0;
+	BeginTextureMode(LineDraw::intermediateRender);
+	ClearBackground(BACKGROUND_COLOR);
+
+	DrawTextureRec(LineDraw::currentRender.texture, { 0,0,(float)LineDraw::currentRender.texture.width,-(float)LineDraw::currentRender.texture.height }, { 0,0 }, WHITE);
+
+	Draw();
+
+	EndTextureMode();
+
+	Image image = LoadImageFromTexture(LineDraw::intermediateRender.texture);
+	Color* pixels = LoadImageColors(image);
+
+	int hWidth = GetScreenWidth() * 0.5;
+	int hHeight = GetScreenHeight() * 0.5;
+	int screenWidth = GetScreenWidth();
+	int screenHeight = GetScreenHeight();
+
+	double cumulativeDistance = 0;
+
+	for (int y = 0; y < screenHeight; y++) {
+		for (int x = 0; x < screenWidth; x++) {
+
+			float distFromCenter = (x - hWidth) * (x - hWidth) + (y - hHeight) * (y - hHeight);
+			if (distFromCenter < CIRCLE_RADIUS * CIRCLE_RADIUS) {
+				Color& fromImage = LineDraw::pixelsToApproximate[x + y * screenWidth];
+				Color& fromDrawer = pixels[x + y * screenWidth];
+
+				float redDist = fromImage.r - fromDrawer.r;
+				float greenDist = fromImage.g - fromDrawer.g;
+				float blueDist = fromImage.b - fromDrawer.b;
+
+
+				cumulativeDistance += 0.0001 * (redDist * redDist + greenDist * greenDist + blueDist * blueDist);
+			}
+		}
+	}
+
+	UnloadImageColors(pixels);
+	UnloadImage(image);
+
+	return cumulativeDistance;
 }
 
 void LineDraw::LineDrawer::LogParameters() const
