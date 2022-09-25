@@ -3,7 +3,9 @@
 #include "GeneticAlgorithm.hpp"
 #include <iostream>
 
-Texture2D GenerateImageToApproximate(const char* imagePath);
+#define IMAGE_PATH "assets/stephanie-leblanc-JLMEZxBcXCU-unsplash.png"
+
+Texture2D GenerateTextureToApproximate(const char* imagePath);
 
 int main()
 {
@@ -12,8 +14,10 @@ int main()
     const int screenWidth = 800;
     const int screenHeight = 450;
 
-    InitWindow(screenWidth, screenHeight, "Raylib Template");
+    InitWindow(screenWidth, screenHeight, "GA String Drawing");
     SetTargetFPS(60); // Set our game to run at 60 frames-per-second
+
+    Texture2D textureToApproximate = GenerateTextureToApproximate(IMAGE_PATH);
     ////--------------------------------------------------------------------------------------
 
     //// Main game loop
@@ -29,10 +33,7 @@ int main()
 
         ClearBackground(RAYWHITE);
 
-        const char *exampleText = "Hello World - Raylib";
-        int textWidth = MeasureText(exampleText, 20);
-        DrawText(exampleText, (screenWidth / 2) - (textWidth / 2), screenHeight / 2 - 10, 20, BLACK);
-
+        DrawTextureRec(textureToApproximate, { 0,0,(float)textureToApproximate.width,-(float)textureToApproximate.height }, {0,0},WHITE);
         DrawFPS(10, 10);
 
         EndDrawing();
@@ -44,12 +45,10 @@ int main()
     CloseWindow(); // Close window and OpenGL context
     ////--------------------------------------------------------------------------------------
 
-    std::cout << "Hello my dude" << std::endl;
-
     return 0;
 }
 
-Texture2D GenerateImageToApproximate(const char* imagePath) {
+Texture2D GenerateTextureToApproximate(const char* imagePath) {
     Image image = LoadImage(imagePath);
     ImageFormat(&image, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
     Texture2D texture = LoadTextureFromImage(image);
