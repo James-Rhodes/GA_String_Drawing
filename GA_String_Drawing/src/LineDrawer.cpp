@@ -1,22 +1,22 @@
 #include "LineDrawer.h"
 
-void LineDrawer::Init()
+void LineDraw::LineDrawer::Init()
 {
 }
 
-void LineDrawer::CrossOver(const LineDrawer& parentA, const LineDrawer& parentB)
+void LineDraw::LineDrawer::CrossOver(const LineDrawer& parentA, const LineDrawer& parentB)
 {
 }
 
-void LineDrawer::Mutate(float mutationRate)
+void LineDraw::LineDrawer::Mutate(float mutationRate)
 {
 }
 
-double LineDrawer::CalculateFitness()
+double LineDraw::LineDrawer::CalculateFitness()
 {
 	return 0.0;
 }
 
-void LineDrawer::LogParameters() const
+void LineDraw::LineDrawer::LogParameters() const
 {
 }

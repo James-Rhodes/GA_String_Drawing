@@ -21,7 +21,7 @@ int main()
     Image imageToApproximate = LoadImageFromTexture(textureToApproximate);
     ImageFlipVertical(&imageToApproximate);
     ExportImage(imageToApproximate,"results/Expected_Output.png"); // Save the result we want the GA to Approximate
-
+    LineDraw::pixelsToApproximate = LoadImageColors(imageToApproximate); // Global (sorry) variable for Line Drawers to try and approximate
     UnloadImage(imageToApproximate);
     //UnloadTexture(textureToApproximate);
     ////--------------------------------------------------------------------------------------

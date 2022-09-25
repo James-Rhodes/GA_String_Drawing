@@ -2,22 +2,28 @@
 
 #include "PopulationMember.hpp"
 #include <iostream>
+#include "raylib.h"
 #define CIRCLE_RESOLUTION 256
 #define CIRCLE_RADIUS 200
 
 #define LINE_WIDTH 2
 
-class LineDrawer : public GA_Cpp::PopulationMember<LineDrawer> {
-public:
-	LineDrawer() = default;
+namespace LineDraw {
 
-    void Init() override;
+    Color* pixelsToApproximate = nullptr;
 
-    void CrossOver(const LineDrawer& parentA, const LineDrawer& parentB) override;
+    class LineDrawer : public GA_Cpp::PopulationMember<LineDrawer> {
+    public:
+        LineDrawer() = default;
 
-    void Mutate(float mutationRate) override;
+        void Init() override;
 
-    double CalculateFitness() override;
+        void CrossOver(const LineDrawer& parentA, const LineDrawer& parentB) override;
 
-    void LogParameters() const override;
-};
+        void Mutate(float mutationRate) override;
+
+        double CalculateFitness() override;
+
+        void LogParameters() const override;
+    };
+}
