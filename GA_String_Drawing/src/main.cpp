@@ -4,6 +4,8 @@
 #include <iostream>
 
 #define IMAGE_PATH "assets/stephanie-leblanc-JLMEZxBcXCU-unsplash.png"
+#define POPULATION_SIZE 1000
+#define MUTATION_RATE 0.05f
 
 Texture2D GenerateTextureToApproximate(const char* imagePath);
 
@@ -16,6 +18,7 @@ int main()
 
     InitWindow(screenWidth, screenHeight, "GA String Drawing");
     SetTargetFPS(60); // Set our game to run at 60 frames-per-second
+    SetTraceLogLevel(LOG_NONE);
 
     Texture2D textureToApproximate = GenerateTextureToApproximate(IMAGE_PATH);
     Image imageToApproximate = LoadImageFromTexture(textureToApproximate);
@@ -24,8 +27,6 @@ int main()
     LineDraw::pixelsToApproximate = LoadImageColors(imageToApproximate); // Global (sorry) variable for Line Drawers to try and approximate
     UnloadImage(imageToApproximate);
 
-    LineDraw::LineDrawer test;
-    test.Init();
 
     LineDraw::intermediateRender = LoadRenderTexture(screenWidth,screenHeight);
 
@@ -34,6 +35,10 @@ int main()
     ClearBackground(BACKGROUND_COLOR); // Initialise current render with black screen
     EndTextureMode();
 
+    GA_Cpp::GeneticAlgorithm<LineDraw::LineDrawer> ga(POPULATION_SIZE,MUTATION_RATE,50);
+    ga.SetPruneFrequency(5,10);
+
+    int numIterations = 0;
     //UnloadTexture(textureToApproximate);
     ////--------------------------------------------------------------------------------------
 
@@ -42,8 +47,16 @@ int main()
     {
         //    // Update
         //    //----------------------------------------------------------------------------------
-        if (IsKeyPressed(KEY_SPACE)) {
-            test.Init();
+        ga.Optimise();
+
+        auto best = ga.GetBestResult();
+        best.LogParameters();
+
+        if (numIterations % 100 == 0) {
+            BeginTextureMode(LineDraw::currentRender);
+            best.Draw();
+            EndTextureMode();
+            ga.InitAll();
         }
         //    //----------------------------------------------------------------------------------
         //    // Draw
@@ -52,12 +65,14 @@ int main()
 
         ClearBackground(BLACK);
 
-        DrawTextureRec(textureToApproximate, { 0,0,(float)textureToApproximate.width,-(float)textureToApproximate.height }, {0,0},WHITE);
-        test.Draw();
+        //DrawTextureRec(textureToApproximate, { 0,0,(float)textureToApproximate.width,-(float)textureToApproximate.height }, {0,0},WHITE);
+        DrawTextureRec(LineDraw::currentRender.texture, { 0,0,(float)LineDraw::currentRender.texture.width,-(float)LineDraw::currentRender.texture.height }, {0,0},WHITE);
+        best.Draw();
 
         DrawFPS(10, 10);
 
         EndDrawing();
+        numIterations++;
         //    //----------------------------------------------------------------------------------
     }
 

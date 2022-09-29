@@ -110,7 +110,7 @@ double LineDraw::LineDrawer::CalculateFitness()
 	UnloadImageColors(pixels);
 	UnloadImage(image);
 
-	return cumulativeDistance;
+	return 1000000/cumulativeDistance;
 }
 
 void LineDraw::LineDrawer::LogParameters() const
