@@ -50,14 +50,24 @@ int main()
     LineDraw::currentRender = LoadRenderTexture(screenWidth, screenHeight);
     BeginTextureMode(LineDraw::currentRender);
     ClearBackground(BACKGROUND_COLOR); // Initialise current render with black screen
+
+    DrawCircle(screenWidth/2,screenHeight/2,20,RED);
+
     EndTextureMode();
 
+    // Remove below when going back from playing with compute shaders
+    BeginTextureMode(LineDraw::intermediateRender);
+    ClearBackground(BACKGROUND_COLOR); // Initialise current render with black screen
+    EndTextureMode();
+
+    //For most basic testing of compute shader. Going to try and transfer data from currentRender (Texture) -> intermediateRender (Texture)
+
     //GA_Cpp::GeneticAlgorithm<LineDraw::LineDrawer> ga(POPULATION_SIZE,MUTATION_RATE,50);
-    GA_Cpp::GeneticAlgorithm<LineDraw::LineDrawer> ga(POPULATION_SIZE, MUTATION_RATE);
+    //GA_Cpp::GeneticAlgorithm<LineDraw::LineDrawer> ga(POPULATION_SIZE, MUTATION_RATE); // For Profiling
 
-    ga.SetPruneFrequency(5,10);
+    //ga.SetPruneFrequency(5,10);
 
-    int numIterations = 0;
+    //int numIterations = 0;
     //UnloadTexture(textureToApproximate);
     ////--------------------------------------------------------------------------------------
 
@@ -66,7 +76,7 @@ int main()
     {
         //    // Update
         //    //----------------------------------------------------------------------------------
-        ga.Optimise();
+  /*      ga.Optimise();
 
         auto best = ga.GetBestResult();
         best.LogParameters();
@@ -76,7 +86,7 @@ int main()
             best.Draw();
             EndTextureMode();
             ga.InitAll();
-        }
+        }*/
         //    //----------------------------------------------------------------------------------
         //    // Draw
         //    //----------------------------------------------------------------------------------
@@ -85,13 +95,15 @@ int main()
         ClearBackground(BLACK);
 
         //DrawTextureRec(textureToApproximate, { 0,0,(float)textureToApproximate.width,-(float)textureToApproximate.height }, {0,0},WHITE);
-        DrawTextureRec(LineDraw::currentRender.texture, { 0,0,(float)LineDraw::currentRender.texture.width,-(float)LineDraw::currentRender.texture.height }, {0,0},WHITE);
-        best.Draw();
+        //DrawTextureRec(LineDraw::currentRender.texture, { 0,0,(float)LineDraw::currentRender.texture.width,-(float)LineDraw::currentRender.texture.height }, {0,0},WHITE);
+        DrawTextureRec(LineDraw::intermediateRender.texture, { 0,0,(float)LineDraw::intermediateRender.texture.width,-(float)LineDraw::intermediateRender.texture.height }, { 0,0 }, WHITE);
+
+        //best.Draw();
 
         DrawFPS(10, 10);
 
         EndDrawing();
-        numIterations++;
+        //numIterations++;
         //    //----------------------------------------------------------------------------------
     }
 
