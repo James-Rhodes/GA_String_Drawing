@@ -1,5 +1,6 @@
 #include "LineDrawer.h"
 
+
 std::array<Vector2, CIRCLE_RESOLUTION> LineDraw::LineDrawer::s_lookupTable;
 Color* LineDraw::pixelsToApproximate = nullptr;
 RenderTexture LineDraw::intermediateRender;
@@ -70,6 +71,9 @@ void LineDraw::LineDrawer::Mutate(float mutationRate)
 
 double LineDraw::LineDrawer::CalculateFitness()
 {
+#ifdef PROFILING_FITNESS_FUNC
+	auto beginDraw = std::chrono::high_resolution_clock::now();
+#endif
 	BeginTextureMode(LineDraw::intermediateRender);
 	ClearBackground(BACKGROUND_COLOR);
 
@@ -78,9 +82,18 @@ double LineDraw::LineDrawer::CalculateFitness()
 	Draw();
 
 	EndTextureMode();
-
+#ifdef PROFILING_FITNESS_FUNC
+	auto endDraw = std::chrono::high_resolution_clock::now();
+	auto beginLoadingData = std::chrono::high_resolution_clock::now();
+#endif
 	Image image = LoadImageFromTexture(LineDraw::intermediateRender.texture);
 	Color* pixels = LoadImageColors(image);
+#ifdef PROFILING_FITNESS_FUNC
+	auto endLoadingData = std::chrono::high_resolution_clock::now();
+
+
+	auto beginCalculation = std::chrono::high_resolution_clock::now();
+#endif
 
 	int hWidth = GetScreenWidth() * 0.5;
 	int hHeight = GetScreenHeight() * 0.5;
@@ -110,6 +123,16 @@ double LineDraw::LineDrawer::CalculateFitness()
 	UnloadImageColors(pixels);
 	UnloadImage(image);
 
+#ifdef PROFILING_FITNESS_FUNC
+	auto endCalculation = std::chrono::high_resolution_clock::now();
+	auto drawTime = std::chrono::duration_cast<std::chrono::microseconds>(endDraw - beginDraw);
+	auto loadingDataTime = std::chrono::duration_cast<std::chrono::microseconds>(endLoadingData - beginLoadingData);
+	auto calculationTime = std::chrono::duration_cast<std::chrono::microseconds>(endCalculation - beginCalculation);
+	auto totalTime = std::chrono::duration_cast<std::chrono::microseconds>(endCalculation - beginDraw);
+
+
+	std::cout << "Draw Time: " << drawTime << " Calculation Time: " << calculationTime <<" Loading From GPU: "<< loadingDataTime << " Total Time: " << totalTime<< std::endl;
+#endif
 	return 1000000/cumulativeDistance;
 }
 

@@ -3,12 +3,15 @@
 #include "PopulationMember.hpp"
 #include <iostream>
 #include <array>
+#include <chrono>
 #include "raylib.h"
 #define CIRCLE_RESOLUTION 256
 #define CIRCLE_RADIUS 200
 #define NUM_LINES 500
 #define BACKGROUND_COLOR BLACK
 #define LINE_WIDTH 2
+
+#define PROFILING_FITNESS_FUNC 
 
 namespace LineDraw {
 
