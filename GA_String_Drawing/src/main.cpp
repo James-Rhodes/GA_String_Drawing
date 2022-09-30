@@ -3,8 +3,25 @@
 #include "GeneticAlgorithm.hpp"
 #include <iostream>
 
+// Below ensures that the extra radeon GPU on my laptop gets used instead of the built in.
+// ----------------------------------------------------------------------
+#ifdef _WIN32
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    __declspec(dllexport) unsigned long NvOptimusEnablement = 1;
+    __declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
+
+#ifdef __cplusplus
+}
+#endif
+#endif
+// ---------------------------------------------------------------------
+
 #define IMAGE_PATH "assets/stephanie-leblanc-JLMEZxBcXCU-unsplash.png"
-#define POPULATION_SIZE 1000
+#define POPULATION_SIZE 5
 #define MUTATION_RATE 0.05f
 
 Texture2D GenerateTextureToApproximate(const char* imagePath);
@@ -35,7 +52,9 @@ int main()
     ClearBackground(BACKGROUND_COLOR); // Initialise current render with black screen
     EndTextureMode();
 
-    GA_Cpp::GeneticAlgorithm<LineDraw::LineDrawer> ga(POPULATION_SIZE,MUTATION_RATE,50);
+    //GA_Cpp::GeneticAlgorithm<LineDraw::LineDrawer> ga(POPULATION_SIZE,MUTATION_RATE,50);
+    GA_Cpp::GeneticAlgorithm<LineDraw::LineDrawer> ga(POPULATION_SIZE, MUTATION_RATE);
+
     ga.SetPruneFrequency(5,10);
 
     int numIterations = 0;
