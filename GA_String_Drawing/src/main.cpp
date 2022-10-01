@@ -22,7 +22,7 @@ extern "C"
 // ---------------------------------------------------------------------
 
 #define IMAGE_PATH "assets/stephanie-leblanc-JLMEZxBcXCU-unsplash.png"
-#define POPULATION_SIZE 10
+#define POPULATION_SIZE 2000
 #define MUTATION_RATE 0.05f
 
 Texture2D GenerateTextureToApproximate(const char* imagePath);
@@ -57,7 +57,7 @@ int main()
     //GA_Cpp::GeneticAlgorithm<LineDraw::LineDrawer> ga(POPULATION_SIZE,MUTATION_RATE,50);
 
 
-    int numIterations = 0;
+    int numIterations = 1;
     //UnloadTexture(textureToApproximate);
     ////--------------------------------------------------------------------------------------
 
@@ -87,8 +87,8 @@ int main()
     //rlReadShaderBuffer(LineDraw::ssboFitnessDetails,&result,sizeof(FitnessDetails),0);
     
     //std::cout << result.distance << std::endl;
-    GA_Cpp::GeneticAlgorithm<LineDraw::LineDrawer> ga(POPULATION_SIZE, MUTATION_RATE); // For Profiling
-    ga.SetPruneFrequency(1,2);
+    GA_Cpp::GeneticAlgorithm<LineDraw::LineDrawer> ga(POPULATION_SIZE, MUTATION_RATE,50); // For Profiling
+    ga.SetPruneFrequency(10,10);
     //// Main game loop
     while (!WindowShouldClose()) // Detect window close button or ESC key
     {
@@ -99,7 +99,7 @@ int main()
         auto best = ga.GetBestResult();
         best.LogParameters();
 
-        if (numIterations % 100 == 0) {
+        if (numIterations % 25 == 0) {
             BeginTextureMode(LineDraw::currentRender);
             best.Draw();
             EndTextureMode();

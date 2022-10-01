@@ -112,7 +112,7 @@ double LineDraw::LineDrawer::CalculateFitness()
 
 	std::cout << "Draw Time: " << drawTime <<" Shader Time: "<< shaderTime<< " Total Time: " << totalTime<< std::endl;
 #endif
-	return 1000000/(float)result.distance;
+	return std::exp(100000000/(float)result.distance);
 }
 
 void LineDraw::LineDrawer::LogParameters() const

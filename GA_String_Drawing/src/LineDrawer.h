@@ -12,7 +12,7 @@
 #define BACKGROUND_COLOR BLACK
 #define LINE_WIDTH 2
 
-#define PROFILING_FITNESS_FUNC 
+//#define PROFILING_FITNESS_FUNC 
 
 namespace LineDraw {
 
