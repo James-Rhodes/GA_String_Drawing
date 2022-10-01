@@ -43,7 +43,8 @@ int main()
     ImageFlipVertical(&imageToApproximate);
     ExportImage(imageToApproximate,"results/Expected_Output.png"); // Save the result we want the GA to Approximate
     UnloadImage(imageToApproximate);
-    // Accidentally checking distance between current render and intermediate. I actually want distance between intermediate and textureToApproximate
+
+
     LineDraw::textureToApproximate = textureToApproximate;
     LineDraw::intermediateRender = LoadRenderTexture(screenWidth,screenHeight);
 
@@ -52,13 +53,7 @@ int main()
     ClearBackground(BLACK); // Initialise current render with black screen
     EndTextureMode();
 
-    //For most basic testing of compute shader. Going to try and transfer data from currentRender (Texture) -> intermediateRender (Texture)
-
-    //GA_Cpp::GeneticAlgorithm<LineDraw::LineDrawer> ga(POPULATION_SIZE,MUTATION_RATE,50);
-
-
     int numIterations = 1;
-    //UnloadTexture(textureToApproximate);
     ////--------------------------------------------------------------------------------------
 
     //Compile Compute Shader
@@ -69,24 +64,7 @@ int main()
 
     // Get Storage Buffer ID
     LineDraw::ssboFitnessDetails = rlLoadShaderBuffer(sizeof(LineDraw::FitnessDetails), NULL, RL_DYNAMIC_COPY);
-    //FitnessDetails test;
 
-    // Update Storage buffer values
-    //rlUpdateShaderBuffer(LineDraw::ssboFitnessDetails, &test, sizeof(FitnessDetails), 0);
-
-    ////Set Shader Uniforms (Textures)
-    //rlEnableShader(LineDraw::computeShaderProgram);
-
-    //rlBindImageTexture(LineDraw::currentRender.texture.id, 0, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8, true);
-    //rlBindImageTexture(LineDraw::intermediateRender.texture.id, 1, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8,false);
-    //rlBindShaderBuffer(LineDraw::ssboFitnessDetails,2);
-
-    //rlComputeShaderDispatch(screenWidth / 16, screenHeight / 16, 1);
-    //rlDisableShader();
-    //FitnessDetails result;
-    //rlReadShaderBuffer(LineDraw::ssboFitnessDetails,&result,sizeof(FitnessDetails),0);
-    
-    //std::cout << result.distance << std::endl;
     GA_Cpp::GeneticAlgorithm<LineDraw::LineDrawer> ga(POPULATION_SIZE, MUTATION_RATE,50); // For Profiling
     ga.SetPruneFrequency(10,10);
     //// Main game loop
