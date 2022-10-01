@@ -50,10 +50,8 @@ int main()
 
     LineDraw::currentRender = LoadRenderTexture(screenWidth, screenHeight);
     BeginTextureMode(LineDraw::currentRender);
-    ClearBackground(BACKGROUND_COLOR); // Initialise current render with black screen
-
-    DrawCircle(screenWidth/2,screenHeight/2,20,RED);
-
+    ClearBackground(RED); // Initialise current render with black screen
+    DrawCircle(screenWidth/2,screenHeight/2,200,BLACK);
     EndTextureMode();
 
     // Remove below when going back from playing with compute shaders
@@ -71,7 +69,10 @@ int main()
     //int numIterations = 0;
     //UnloadTexture(textureToApproximate);
     ////--------------------------------------------------------------------------------------
-
+    struct FitnessDetails {
+        unsigned int squaredDistance = 0; // For storing the squared distance between the two images
+        float greenColor = 0; // For testing that the SSBO is working
+    };
 
     //Compile Compute Shader
     char* computeShaderCode = LoadFileText("shaders/CalculateFitness_ComputeShader.glsl");
@@ -79,15 +80,27 @@ int main()
     unsigned int computeShaderProgram = rlLoadComputeShaderProgram(computeShader);
     UnloadFileText(computeShaderCode);
 
+    // Get Storage Buffer ID
+    unsigned int ssboFitnessDetails = rlLoadShaderBuffer(sizeof(FitnessDetails), NULL, RL_DYNAMIC_COPY);
+    FitnessDetails test;
+    test.greenColor = 1;
+
+    // Update Storage buffer values
+    rlUpdateShaderBuffer(ssboFitnessDetails, &test, sizeof(FitnessDetails), 0);
+
     //Set Shader Uniforms (Textures)
     rlEnableShader(computeShaderProgram);
 
     rlBindImageTexture(LineDraw::currentRender.texture.id, 0, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8, true);
     rlBindImageTexture(LineDraw::intermediateRender.texture.id, 1, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8,false);
+    rlBindShaderBuffer(ssboFitnessDetails,2);
 
     rlComputeShaderDispatch(screenWidth / 16, screenHeight / 16, 1);
     rlDisableShader();
-
+    FitnessDetails result;
+    rlReadShaderBuffer(ssboFitnessDetails,&result,sizeof(FitnessDetails),0);
+    
+    std::cout << result.greenColor <<" , "<<result.squaredDistance<< std::endl;
     //// Main game loop
     while (!WindowShouldClose()) // Detect window close button or ESC key
     {
