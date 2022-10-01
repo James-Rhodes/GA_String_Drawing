@@ -2,6 +2,7 @@
 #include "LineDrawer.h"
 #include "GeneticAlgorithm.hpp"
 #include <iostream>
+#include "rlgl.h"
 
 // Below ensures that the extra radeon GPU on my laptop gets used instead of the built in.
 // ----------------------------------------------------------------------
@@ -31,7 +32,7 @@ int main()
     //// Initialization
     ////--------------------------------------------------------------------------------------
     const int screenWidth = 800;
-    const int screenHeight = 450;
+    const int screenHeight = 480;
 
     InitWindow(screenWidth, screenHeight, "GA String Drawing");
     SetTargetFPS(60); // Set our game to run at 60 frames-per-second
@@ -70,6 +71,22 @@ int main()
     //int numIterations = 0;
     //UnloadTexture(textureToApproximate);
     ////--------------------------------------------------------------------------------------
+
+
+    //Compile Compute Shader
+    char* computeShaderCode = LoadFileText("shaders/CalculateFitness_ComputeShader.glsl");
+    unsigned int computeShader = rlCompileShader(computeShaderCode, RL_COMPUTE_SHADER);
+    unsigned int computeShaderProgram = rlLoadComputeShaderProgram(computeShader);
+    UnloadFileText(computeShaderCode);
+
+    //Set Shader Uniforms (Textures)
+    rlEnableShader(computeShaderProgram);
+
+    rlBindImageTexture(LineDraw::currentRender.texture.id, 0, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8, true);
+    rlBindImageTexture(LineDraw::intermediateRender.texture.id, 1, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8,false);
+
+    rlComputeShaderDispatch(screenWidth / 16, screenHeight / 16, 1);
+    rlDisableShader();
 
     //// Main game loop
     while (!WindowShouldClose()) // Detect window close button or ESC key
