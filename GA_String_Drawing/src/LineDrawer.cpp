@@ -2,10 +2,11 @@
 
 
 std::array<Vector2, CIRCLE_RESOLUTION> LineDraw::LineDrawer::s_lookupTable;
-Color* LineDraw::pixelsToApproximate = nullptr;
 RenderTexture LineDraw::intermediateRender;
 RenderTexture LineDraw::currentRender;
-
+Texture2D LineDraw::textureToApproximate;
+unsigned int LineDraw::computeShaderProgram; // Compute Shader
+unsigned int LineDraw::ssboFitnessDetails; // The buffer id that will contain the fitness details.
 
 void LineDraw::LineDrawer::Init()
 {
@@ -84,56 +85,34 @@ double LineDraw::LineDrawer::CalculateFitness()
 	EndTextureMode();
 #ifdef PROFILING_FITNESS_FUNC
 	auto endDraw = std::chrono::high_resolution_clock::now();
-	auto beginLoadingData = std::chrono::high_resolution_clock::now();
+
+	auto beginShader = std::chrono::high_resolution_clock::now();
 #endif
-	Image image = LoadImageFromTexture(LineDraw::intermediateRender.texture);
-	Color* pixels = LoadImageColors(image);
+	LineDraw::FitnessDetails zeroDistance;
+	rlUpdateShaderBuffer(LineDraw::ssboFitnessDetails, &zeroDistance, sizeof(FitnessDetails), 0);
+
+	//Set Shader Uniforms (Textures)
+	rlEnableShader(LineDraw::computeShaderProgram);
+
+	rlBindImageTexture(LineDraw::intermediateRender.texture.id, 0, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8, true);
+	rlBindImageTexture(LineDraw::textureToApproximate.id, 1, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8, true);
+	rlBindShaderBuffer(LineDraw::ssboFitnessDetails, 2);
+
+	rlComputeShaderDispatch(GetScreenWidth() / 16, GetScreenHeight() / 16, 1);
+	rlDisableShader();
+
+	LineDraw::FitnessDetails result;
+	rlReadShaderBuffer(LineDraw::ssboFitnessDetails, &result, sizeof(FitnessDetails), 0);
 #ifdef PROFILING_FITNESS_FUNC
-	auto endLoadingData = std::chrono::high_resolution_clock::now();
-
-
-	auto beginCalculation = std::chrono::high_resolution_clock::now();
-#endif
-
-	int hWidth = GetScreenWidth() * 0.5;
-	int hHeight = GetScreenHeight() * 0.5;
-	int screenWidth = GetScreenWidth();
-	int screenHeight = GetScreenHeight();
-
-	double cumulativeDistance = 0;
-
-	for (int y = 0; y < screenHeight; y++) {
-		for (int x = 0; x < screenWidth; x++) {
-
-			float distFromCenter = (x - hWidth) * (x - hWidth) + (y - hHeight) * (y - hHeight);
-			if (distFromCenter < CIRCLE_RADIUS * CIRCLE_RADIUS) {
-				Color& fromImage = LineDraw::pixelsToApproximate[x + y * screenWidth];
-				Color& fromDrawer = pixels[x + y * screenWidth];
-
-				float redDist = fromImage.r - fromDrawer.r;
-				float greenDist = fromImage.g - fromDrawer.g;
-				float blueDist = fromImage.b - fromDrawer.b;
-
-
-				cumulativeDistance += 0.0001 * (redDist * redDist + greenDist * greenDist + blueDist * blueDist);
-			}
-		}
-	}
-
-	UnloadImageColors(pixels);
-	UnloadImage(image);
-
-#ifdef PROFILING_FITNESS_FUNC
-	auto endCalculation = std::chrono::high_resolution_clock::now();
+	auto endShader = std::chrono::high_resolution_clock::now();
 	auto drawTime = std::chrono::duration_cast<std::chrono::microseconds>(endDraw - beginDraw);
-	auto loadingDataTime = std::chrono::duration_cast<std::chrono::microseconds>(endLoadingData - beginLoadingData);
-	auto calculationTime = std::chrono::duration_cast<std::chrono::microseconds>(endCalculation - beginCalculation);
-	auto totalTime = std::chrono::duration_cast<std::chrono::microseconds>(endCalculation - beginDraw);
+	auto shaderTime = std::chrono::duration_cast<std::chrono::microseconds>(endShader - beginShader);
+	auto totalTime = std::chrono::duration_cast<std::chrono::microseconds>(endShader - beginDraw);
 
 
-	std::cout << "Draw Time: " << drawTime << " Calculation Time: " << calculationTime <<" Loading From GPU: "<< loadingDataTime << " Total Time: " << totalTime<< std::endl;
+	std::cout << "Draw Time: " << drawTime <<" Shader Time: "<< shaderTime<< " Total Time: " << totalTime<< std::endl;
 #endif
-	return 1000000/cumulativeDistance;
+	return 1000000/(float)result.distance;
 }
 
 void LineDraw::LineDrawer::LogParameters() const

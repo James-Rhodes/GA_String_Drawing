@@ -5,6 +5,7 @@
 #include <array>
 #include <chrono>
 #include "raylib.h"
+#include "rlgl.h"
 #define CIRCLE_RESOLUTION 256
 #define CIRCLE_RADIUS 200
 #define NUM_LINES 500
@@ -15,15 +16,21 @@
 
 namespace LineDraw {
 
-    extern Color* pixelsToApproximate;
-
     extern RenderTexture2D intermediateRender;
     extern RenderTexture2D currentRender;
+    extern Texture2D textureToApproximate;
+
+    extern unsigned int computeShaderProgram; // Compute Shader
+    extern unsigned int ssboFitnessDetails; // The buffer id that will contain the fitness details.
 
 
     struct LineIndices {
         int ptAIndex = -1;
         int ptBIndex = -1;
+    };
+
+    struct FitnessDetails {
+        unsigned int distance = 0;
     };
 
     class LineDrawer : public GA_Cpp::PopulationMember<LineDrawer> {

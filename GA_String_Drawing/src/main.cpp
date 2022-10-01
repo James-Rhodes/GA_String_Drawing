@@ -22,7 +22,7 @@ extern "C"
 // ---------------------------------------------------------------------
 
 #define IMAGE_PATH "assets/stephanie-leblanc-JLMEZxBcXCU-unsplash.png"
-#define POPULATION_SIZE 5
+#define POPULATION_SIZE 10
 #define MUTATION_RATE 0.05f
 
 Texture2D GenerateTextureToApproximate(const char* imagePath);
@@ -42,71 +42,59 @@ int main()
     Image imageToApproximate = LoadImageFromTexture(textureToApproximate);
     ImageFlipVertical(&imageToApproximate);
     ExportImage(imageToApproximate,"results/Expected_Output.png"); // Save the result we want the GA to Approximate
-    LineDraw::pixelsToApproximate = LoadImageColors(imageToApproximate); // Global (sorry) variable for Line Drawers to try and approximate
     UnloadImage(imageToApproximate);
-
-
+    // Accidentally checking distance between current render and intermediate. I actually want distance between intermediate and textureToApproximate
+    LineDraw::textureToApproximate = textureToApproximate;
     LineDraw::intermediateRender = LoadRenderTexture(screenWidth,screenHeight);
 
     LineDraw::currentRender = LoadRenderTexture(screenWidth, screenHeight);
     BeginTextureMode(LineDraw::currentRender);
-    ClearBackground(RED); // Initialise current render with black screen
-    DrawCircle(screenWidth/2,screenHeight/2,200,BLACK);
-    EndTextureMode();
-
-    // Remove below when going back from playing with compute shaders
-    BeginTextureMode(LineDraw::intermediateRender);
-    ClearBackground(BACKGROUND_COLOR); // Initialise current render with black screen
+    ClearBackground(BLACK); // Initialise current render with black screen
     EndTextureMode();
 
     //For most basic testing of compute shader. Going to try and transfer data from currentRender (Texture) -> intermediateRender (Texture)
 
     //GA_Cpp::GeneticAlgorithm<LineDraw::LineDrawer> ga(POPULATION_SIZE,MUTATION_RATE,50);
-    //GA_Cpp::GeneticAlgorithm<LineDraw::LineDrawer> ga(POPULATION_SIZE, MUTATION_RATE); // For Profiling
 
-    //ga.SetPruneFrequency(5,10);
 
-    //int numIterations = 0;
+    int numIterations = 0;
     //UnloadTexture(textureToApproximate);
     ////--------------------------------------------------------------------------------------
-    struct FitnessDetails {
-        unsigned int squaredDistance = 0; // For storing the squared distance between the two images
-        float greenColor = 0; // For testing that the SSBO is working
-    };
 
     //Compile Compute Shader
     char* computeShaderCode = LoadFileText("shaders/CalculateFitness_ComputeShader.glsl");
     unsigned int computeShader = rlCompileShader(computeShaderCode, RL_COMPUTE_SHADER);
-    unsigned int computeShaderProgram = rlLoadComputeShaderProgram(computeShader);
+    LineDraw::computeShaderProgram = rlLoadComputeShaderProgram(computeShader);
     UnloadFileText(computeShaderCode);
 
     // Get Storage Buffer ID
-    unsigned int ssboFitnessDetails = rlLoadShaderBuffer(sizeof(FitnessDetails), NULL, RL_DYNAMIC_COPY);
-    FitnessDetails test;
-    test.greenColor = 1;
+    LineDraw::ssboFitnessDetails = rlLoadShaderBuffer(sizeof(LineDraw::FitnessDetails), NULL, RL_DYNAMIC_COPY);
+    //FitnessDetails test;
 
     // Update Storage buffer values
-    rlUpdateShaderBuffer(ssboFitnessDetails, &test, sizeof(FitnessDetails), 0);
+    //rlUpdateShaderBuffer(LineDraw::ssboFitnessDetails, &test, sizeof(FitnessDetails), 0);
 
-    //Set Shader Uniforms (Textures)
-    rlEnableShader(computeShaderProgram);
+    ////Set Shader Uniforms (Textures)
+    //rlEnableShader(LineDraw::computeShaderProgram);
 
-    rlBindImageTexture(LineDraw::currentRender.texture.id, 0, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8, true);
-    rlBindImageTexture(LineDraw::intermediateRender.texture.id, 1, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8,false);
-    rlBindShaderBuffer(ssboFitnessDetails,2);
+    //rlBindImageTexture(LineDraw::currentRender.texture.id, 0, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8, true);
+    //rlBindImageTexture(LineDraw::intermediateRender.texture.id, 1, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8,false);
+    //rlBindShaderBuffer(LineDraw::ssboFitnessDetails,2);
 
-    rlComputeShaderDispatch(screenWidth / 16, screenHeight / 16, 1);
-    rlDisableShader();
-    FitnessDetails result;
-    rlReadShaderBuffer(ssboFitnessDetails,&result,sizeof(FitnessDetails),0);
+    //rlComputeShaderDispatch(screenWidth / 16, screenHeight / 16, 1);
+    //rlDisableShader();
+    //FitnessDetails result;
+    //rlReadShaderBuffer(LineDraw::ssboFitnessDetails,&result,sizeof(FitnessDetails),0);
     
-    std::cout << result.greenColor <<" , "<<result.squaredDistance<< std::endl;
+    //std::cout << result.distance << std::endl;
+    GA_Cpp::GeneticAlgorithm<LineDraw::LineDrawer> ga(POPULATION_SIZE, MUTATION_RATE); // For Profiling
+    ga.SetPruneFrequency(1,2);
     //// Main game loop
     while (!WindowShouldClose()) // Detect window close button or ESC key
     {
         //    // Update
         //    //----------------------------------------------------------------------------------
-  /*      ga.Optimise();
+        ga.Optimise();
 
         auto best = ga.GetBestResult();
         best.LogParameters();
@@ -116,7 +104,7 @@ int main()
             best.Draw();
             EndTextureMode();
             ga.InitAll();
-        }*/
+        }
         //    //----------------------------------------------------------------------------------
         //    // Draw
         //    //----------------------------------------------------------------------------------
@@ -125,15 +113,14 @@ int main()
         ClearBackground(BLACK);
 
         //DrawTextureRec(textureToApproximate, { 0,0,(float)textureToApproximate.width,-(float)textureToApproximate.height }, {0,0},WHITE);
-        //DrawTextureRec(LineDraw::currentRender.texture, { 0,0,(float)LineDraw::currentRender.texture.width,-(float)LineDraw::currentRender.texture.height }, {0,0},WHITE);
-        DrawTextureRec(LineDraw::intermediateRender.texture, { 0,0,(float)LineDraw::intermediateRender.texture.width,-(float)LineDraw::intermediateRender.texture.height }, { 0,0 }, WHITE);
+        DrawTextureRec(LineDraw::currentRender.texture, { 0,0,(float)LineDraw::currentRender.texture.width,-(float)LineDraw::currentRender.texture.height }, {0,0},WHITE);
 
-        //best.Draw();
+        best.Draw();
 
         DrawFPS(10, 10);
 
         EndDrawing();
-        //numIterations++;
+        numIterations++;
         //    //----------------------------------------------------------------------------------
     }
 
