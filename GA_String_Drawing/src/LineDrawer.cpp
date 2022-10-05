@@ -17,8 +17,8 @@ void LineDraw::LineDrawer::Init()
 		float angleDelta = 2 * PI / CIRCLE_RESOLUTION;
 
 		for (size_t i = 0; i < s_lookupTable.size(); i++) {
-			s_lookupTable[i].x = CIRCLE_RADIUS * cos(angleDelta * i) + 0.5 * GetScreenWidth();
-			s_lookupTable[i].y = CIRCLE_RADIUS * sin(angleDelta * i) + 0.5 * GetScreenHeight();
+			s_lookupTable[i].x = CIRCLE_RADIUS * cos(angleDelta * i) + 0.5f * GetScreenWidth();
+			s_lookupTable[i].y = CIRCLE_RADIUS * sin(angleDelta * i) + 0.5f * GetScreenHeight();
 		}
 	}
 

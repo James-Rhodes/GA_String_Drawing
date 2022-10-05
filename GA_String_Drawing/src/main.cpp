@@ -126,8 +126,8 @@ Texture2D GenerateTextureToApproximate(const char* imagePath) {
 
     float angleDelta = 2 * PI / CIRCLE_RESOLUTION;
     for (int i = 0; i < CIRCLE_RESOLUTION + 1; i++) {
-        texCoords[i].x = 0.5 * cos(-angleDelta * i) + 0.5;
-        texCoords[i].y = 0.5 * sin(-angleDelta * i) + 0.5;
+        texCoords[i].x = 0.5f * cos(-angleDelta * i) + 0.5f;
+        texCoords[i].y = 0.5f * sin(-angleDelta * i) + 0.5f;
 
         circlePoints[i].x = CIRCLE_RADIUS * cos(-angleDelta * i);
         circlePoints[i].y = CIRCLE_RADIUS * sin(-angleDelta * i);
