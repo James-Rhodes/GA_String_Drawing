@@ -6,6 +6,7 @@
 #include <chrono>
 #include "raylib.h"
 #include "rlgl.h"
+#include "Dithering.h"
 #define CIRCLE_RESOLUTION 256
 #define CIRCLE_RADIUS 200
 #define NUM_LINES 500
@@ -52,6 +53,8 @@ namespace LineDraw {
 
     private:
         static std::array<Vector2, CIRCLE_RESOLUTION> s_lookupTable; // Look up for all LineDrawers for positions of lines
+        static std::vector<Color> s_colorLookupTable; // Look up for all LineDrawers for colors of lines
+
         std::array<Color,NUM_LINES> m_colors;
         std::array<LineIndices,NUM_LINES> m_lineIndices;
     };

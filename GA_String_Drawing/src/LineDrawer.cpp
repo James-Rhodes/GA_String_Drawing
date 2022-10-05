@@ -2,6 +2,8 @@
 
 
 std::array<Vector2, CIRCLE_RESOLUTION> LineDraw::LineDrawer::s_lookupTable;
+std::vector<Color> LineDraw::LineDrawer::s_colorLookupTable;
+
 RenderTexture LineDraw::intermediateRender;
 RenderTexture LineDraw::currentRender;
 Texture2D LineDraw::textureToApproximate;
@@ -20,6 +22,8 @@ void LineDraw::LineDrawer::Init()
 			s_lookupTable[i].x = CIRCLE_RADIUS * cos(angleDelta * i) + 0.5f * GetScreenWidth();
 			s_lookupTable[i].y = CIRCLE_RADIUS * sin(angleDelta * i) + 0.5f * GetScreenHeight();
 		}
+
+		s_colorLookupTable = GetColorPalette(LineDraw::textureToApproximate);
 	}
 
 
@@ -28,11 +32,9 @@ void LineDraw::LineDrawer::Init()
 		m_lineIndices[i].ptAIndex = GA_Cpp::GetRandomInt(0, CIRCLE_RESOLUTION - 1);
 		m_lineIndices[i].ptBIndex = GA_Cpp::GetRandomInt(0, CIRCLE_RESOLUTION - 1);
 
-		m_colors[i].r = GA_Cpp::GetRandomInt(0, 255);
-		m_colors[i].g = GA_Cpp::GetRandomInt(0, 255);
-		m_colors[i].b = GA_Cpp::GetRandomInt(0, 255);
+		int randomColorIndex = GA_Cpp::GetRandomInt(0, s_colorLookupTable.size()-1);
+		m_colors[i] = s_colorLookupTable[randomColorIndex];
 		m_colors[i].a = 255;
-
 	}
 }
 
@@ -63,10 +65,7 @@ void LineDraw::LineDrawer::Mutate(float mutationRate)
 		m_lineIndices[i].ptAIndex = (m_lineIndices[i].ptAIndex + (int)(CIRCLE_RESOLUTION * GA_Cpp::GetRandom01())) % CIRCLE_RESOLUTION;
 		m_lineIndices[i].ptBIndex = (m_lineIndices[i].ptBIndex + (int)(CIRCLE_RESOLUTION * GA_Cpp::GetRandom01())) % CIRCLE_RESOLUTION;
 
-		m_colors[i].r = (m_colors[i].r + (int)(255 * GA_Cpp::GetRandom01())) % 255;
-		m_colors[i].g = (m_colors[i].g + (int)(255 * GA_Cpp::GetRandom01())) % 255;
-		m_colors[i].b = (m_colors[i].b + (int)(255 * GA_Cpp::GetRandom01())) % 255;
-
+		m_colors[i] = s_colorLookupTable[(int)((s_colorLookupTable.size() - 1) * GA_Cpp::GetRandom01())];
 	}
 }
 
