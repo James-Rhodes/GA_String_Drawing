@@ -1,6 +1,7 @@
 #include "raylib.h"
 #include "LineDrawer.h"
 #include "GeneticAlgorithm.hpp"
+#include "Dithering.h"
 #include <iostream>
 #include "rlgl.h"
 
@@ -45,8 +46,9 @@ int main()
     UnloadImage(imageToApproximate);
 
 
-    LineDraw::textureToApproximate = textureToApproximate;
+    LineDraw::textureToApproximate = CreateReducedColorPaletteTexture(textureToApproximate,8);
     LineDraw::intermediateRender = LoadRenderTexture(screenWidth,screenHeight);
+    UnloadTexture(textureToApproximate);
 
     LineDraw::currentRender = LoadRenderTexture(screenWidth, screenHeight);
     BeginTextureMode(LineDraw::currentRender);
