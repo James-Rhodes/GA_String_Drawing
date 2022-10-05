@@ -35,9 +35,9 @@ Texture2D CreateReducedColorPaletteTexture(const Texture2D& texture , int numCol
 	numColors = PreviousPowerOfTwo(numColors);
 	int size = numColors * numColors;
 	std::vector<float>thresholdMap = GetThresholdMap(numColors);
-	float spread = 0.1;
+	float spread = 0.1f;
 
-	Vector2 resolution = { texture.width,texture.height };
+	Vector2 resolution = { (float)texture.width,(float)texture.height };
 
 	// Step 1: Load Shader
 	Shader shader = LoadShader(0, "shaders/ReduceColorPalette_fs.glsl");
@@ -89,10 +89,10 @@ std::vector<float> GetThresholdMap(int numColors) {
 
 	for (int i = 0; i < n * n; i++) {
 		int x = i % n;
-		int y = std::floor(i / n);
+		int y = (int)std::floor(i / n);
 		
 		int Mint = GetThresholdMapAtIndex(x, y, n);
-		result[i] = (((float)(Mint + 1)) / (n * n)) - 0.5;
+		result[i] = (((float)(Mint + 1)) / (n * n)) - 0.5f;
 	}
 
 	return result;
@@ -105,7 +105,7 @@ int GetThresholdMapAtIndex(int i, int j, int n) {
 		return nIs2ThresholdMap[i + j * n];
 	}
 	int nextN = PreviousPowerOfTwo(n - 1);
-	return GetThresholdMapAtIndex(std::floor(i/2), std::floor(j/2), nextN) + GetThresholdMapAtIndex(i % 2, j % 2, nextN) * 4;
+	return GetThresholdMapAtIndex((int)std::floor(i/2), (int)std::floor(j/2), nextN) + GetThresholdMapAtIndex(i % 2, j % 2, nextN) * 4;
 }
 
 uint32_t PreviousPowerOfTwo(uint32_t x) {
