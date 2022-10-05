@@ -45,8 +45,13 @@ int main()
     ExportImage(imageToApproximate,"results/Expected_Output.png"); // Save the result we want the GA to Approximate
     UnloadImage(imageToApproximate);
 
+    Texture2D reducedPaletteTexture = CreateReducedColorPaletteTexture(textureToApproximate, 8);
+    Image reducedPaletteImage = LoadImageFromTexture(reducedPaletteTexture);
+    ExportImage(reducedPaletteImage, "results/Reduced_Palette_Image.png"); // Save the result we want the GA to Approximate
+    UnloadImage(reducedPaletteImage);
 
-    LineDraw::textureToApproximate = CreateReducedColorPaletteTexture(textureToApproximate,8);
+
+    LineDraw::textureToApproximate = reducedPaletteTexture;
     LineDraw::intermediateRender = LoadRenderTexture(screenWidth,screenHeight);
     UnloadTexture(textureToApproximate);
 
