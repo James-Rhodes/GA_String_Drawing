@@ -3,7 +3,6 @@
 #include "GeneticAlgorithm.hpp"
 #include <iostream>
 #include "rlgl.h"
-#include "Dithering.h"
 
 // Below ensures that the extra radeon GPU on my laptop gets used instead of the built in.
 // ----------------------------------------------------------------------
@@ -66,51 +65,41 @@ int main()
     // Get Storage Buffer ID
     LineDraw::ssboFitnessDetails = rlLoadShaderBuffer(sizeof(LineDraw::FitnessDetails), NULL, RL_DYNAMIC_COPY);
 
-    //GA_Cpp::GeneticAlgorithm<LineDraw::LineDrawer> ga(POPULATION_SIZE, MUTATION_RATE,50); // For Profiling
-    //ga.SetPruneFrequency(10,10);
-        
-    Texture2D testDithering = CreateReducedColorPaletteTexture(textureToApproximate,1);
-    
+    GA_Cpp::GeneticAlgorithm<LineDraw::LineDrawer> ga(POPULATION_SIZE, MUTATION_RATE,50); // For Profiling
+    ga.SetPruneFrequency(10,10);
     //// Main game loop
     while (!WindowShouldClose()) // Detect window close button or ESC key
     {
         //    // Update
         //    //----------------------------------------------------------------------------------
-        //ga.Optimise();
+        ga.Optimise();
 
-        //auto best = ga.GetBestResult();
-        //best.LogParameters();
+        auto best = ga.GetBestResult();
+        best.LogParameters();
 
-        //if (numIterations % 25 == 0) {
-        //    BeginTextureMode(LineDraw::currentRender);
-        //    best.Draw();
-        //    EndTextureMode();
-        //    ga.InitAll();
-        //}
+        if (numIterations % 25 == 0) {
+            BeginTextureMode(LineDraw::currentRender);
+            best.Draw();
+            EndTextureMode();
+            ga.InitAll();
+        }
         //    //----------------------------------------------------------------------------------
         //    // Draw
         //    //----------------------------------------------------------------------------------
-        //BeginDrawing();
-
-        //ClearBackground(BLACK);
-
-        ////DrawTextureRec(textureToApproximate, { 0,0,(float)textureToApproximate.width,-(float)textureToApproximate.height }, {0,0},WHITE);
-        //DrawTextureRec(LineDraw::currentRender.texture, { 0,0,(float)LineDraw::currentRender.texture.width,-(float)LineDraw::currentRender.texture.height }, {0,0},WHITE);
-
-        //best.Draw();
-
-        //DrawFPS(10, 10);
-
-        //EndDrawing();
-        //numIterations++;
-        //    //----------------------------------------------------------------------------------
         BeginDrawing();
 
-        DrawTextureRec(testDithering, { 0,0,(float)testDithering.width,(float)testDithering.height }, {0,0},WHITE);
+        ClearBackground(BLACK);
 
+        //DrawTextureRec(textureToApproximate, { 0,0,(float)textureToApproximate.width,-(float)textureToApproximate.height }, {0,0},WHITE);
+        DrawTextureRec(LineDraw::currentRender.texture, { 0,0,(float)LineDraw::currentRender.texture.width,-(float)LineDraw::currentRender.texture.height }, {0,0},WHITE);
+
+        best.Draw();
+
+        DrawFPS(10, 10);
 
         EndDrawing();
-    
+        numIterations++;
+        //    //----------------------------------------------------------------------------------
     }
 
     //// De-Initialization
