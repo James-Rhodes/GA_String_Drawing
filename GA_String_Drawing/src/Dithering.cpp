@@ -4,7 +4,14 @@
 std::vector<Color> GetReducedColorPalette(const Texture2D& texture, int numColors){
 
 	Texture2D reducedColorTexture = CreateReducedColorPaletteTexture(texture,numColors);
-	Image reducedColorImage = LoadImageFromTexture(reducedColorTexture);
+	auto result = GetColorPalette(texture);
+	UnloadTexture(reducedColorTexture);
+	return result;
+}
+
+std::vector<Color> GetColorPalette(const Texture2D& image)
+{
+	Image reducedColorImage = LoadImageFromTexture(image);
 	Color* pixels = LoadImageColors(reducedColorImage);
 
 	std::unordered_map<std::string, Color> colorMap;
@@ -25,7 +32,7 @@ std::vector<Color> GetReducedColorPalette(const Texture2D& texture, int numColor
 
 	UnloadImageColors(pixels);
 	UnloadImage(reducedColorImage);
-	UnloadTexture(reducedColorTexture);
+
 	return result;
 }
 

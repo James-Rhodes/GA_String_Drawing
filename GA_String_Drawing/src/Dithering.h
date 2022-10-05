@@ -7,7 +7,7 @@
 #include <cmath>
 
 std::vector<Color> GetReducedColorPalette(const Texture2D& image, int numColors);
-
+std::vector<Color> GetColorPalette(const Texture2D& image);
 Texture2D CreateReducedColorPaletteTexture(const Texture2D& image, int numColors);
 
 std::vector<float> GetThresholdMap(int numColors);
