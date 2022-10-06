@@ -32,13 +32,15 @@ void LineDraw::LineDrawer::Init()
 		m_lineIndices[i].ptAIndex = GA_Cpp::GetRandomInt(0, CIRCLE_RESOLUTION - 1);
 		m_lineIndices[i].ptBIndex = GA_Cpp::GetRandomInt(0, CIRCLE_RESOLUTION - 1);
 
-		m_colorIndices[i] = GA_Cpp::GetRandomInt(0, s_colorLookupTable.size()-1);
+		m_colorIndices[i] = GA_Cpp::GetRandomInt(0, (int)s_colorLookupTable.size()-1);
 	}
 }
 
 void LineDraw::LineDrawer::CrossOver(const LineDrawer& parentA, const LineDrawer& parentB)
 {
-	size_t crossOverPoint = m_lineIndices.size() / 2; // Simple midpoint crossover
+	//size_t crossOverPoint = m_lineIndices.size() / 2; // Simple midpoint crossover
+	double t = parentA.fitness / (parentA.fitness + parentB.fitness);
+	size_t crossOverPoint = (size_t)std::lerp(0,m_lineIndices.size(),t);
 	for (size_t i = 0; i < m_lineIndices.size(); i++) {
 		if (i < crossOverPoint) {
 			m_lineIndices[i].ptAIndex = parentA.m_lineIndices[i].ptAIndex;
@@ -63,7 +65,7 @@ void LineDraw::LineDrawer::Mutate(float mutationRate)
 		m_lineIndices[i].ptAIndex = (m_lineIndices[i].ptAIndex + (int)(CIRCLE_RESOLUTION * GA_Cpp::GetRandom01())) % CIRCLE_RESOLUTION;
 		m_lineIndices[i].ptBIndex = (m_lineIndices[i].ptBIndex + (int)(CIRCLE_RESOLUTION * GA_Cpp::GetRandom01())) % CIRCLE_RESOLUTION;
 
-		float randNum = 2 * (GA_Cpp::GetRandom01() - 0.5);
+		float randNum = 2.0f * ((float)GA_Cpp::GetRandom01() - 0.5f);
 		m_colorIndices[i] = (m_colorIndices[i] + (int)(randNum * ((int)s_colorLookupTable.size() - 1))) % s_colorLookupTable.size();
 
 	}
