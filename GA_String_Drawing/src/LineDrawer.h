@@ -55,7 +55,7 @@ namespace LineDraw {
         static std::array<Vector2, CIRCLE_RESOLUTION> s_lookupTable; // Look up for all LineDrawers for positions of lines
         static std::vector<Color> s_colorLookupTable; // Look up for all LineDrawers for colors of lines
 
-        std::array<Color,NUM_LINES> m_colors;
+        std::array<int,NUM_LINES> m_colorIndices;
         std::array<LineIndices,NUM_LINES> m_lineIndices;
     };
 }

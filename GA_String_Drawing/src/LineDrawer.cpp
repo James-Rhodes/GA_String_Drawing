@@ -32,9 +32,7 @@ void LineDraw::LineDrawer::Init()
 		m_lineIndices[i].ptAIndex = GA_Cpp::GetRandomInt(0, CIRCLE_RESOLUTION - 1);
 		m_lineIndices[i].ptBIndex = GA_Cpp::GetRandomInt(0, CIRCLE_RESOLUTION - 1);
 
-		int randomColorIndex = GA_Cpp::GetRandomInt(0, s_colorLookupTable.size()-1);
-		m_colors[i] = s_colorLookupTable[randomColorIndex];
-		m_colors[i].a = 255;
+		m_colorIndices[i] = GA_Cpp::GetRandomInt(0, s_colorLookupTable.size()-1);
 	}
 }
 
@@ -46,13 +44,13 @@ void LineDraw::LineDrawer::CrossOver(const LineDrawer& parentA, const LineDrawer
 			m_lineIndices[i].ptAIndex = parentA.m_lineIndices[i].ptAIndex;
 			m_lineIndices[i].ptBIndex = parentA.m_lineIndices[i].ptBIndex;
 
-			m_colors[i] = parentA.m_colors[i];
+			m_colorIndices[i] = parentA.m_colorIndices[i];
 		}
 		else {
 			m_lineIndices[i].ptAIndex = parentB.m_lineIndices[i].ptAIndex;
 			m_lineIndices[i].ptBIndex = parentB.m_lineIndices[i].ptBIndex;
 
-			m_colors[i] = parentB.m_colors[i];
+			m_colorIndices[i] = parentB.m_colorIndices[i];
 		}
 	}
 }
@@ -65,7 +63,9 @@ void LineDraw::LineDrawer::Mutate(float mutationRate)
 		m_lineIndices[i].ptAIndex = (m_lineIndices[i].ptAIndex + (int)(CIRCLE_RESOLUTION * GA_Cpp::GetRandom01())) % CIRCLE_RESOLUTION;
 		m_lineIndices[i].ptBIndex = (m_lineIndices[i].ptBIndex + (int)(CIRCLE_RESOLUTION * GA_Cpp::GetRandom01())) % CIRCLE_RESOLUTION;
 
-		m_colors[i] = s_colorLookupTable[(int)((s_colorLookupTable.size() - 1) * GA_Cpp::GetRandom01())];
+		float randNum = 2 * (GA_Cpp::GetRandom01() - 0.5);
+		m_colorIndices[i] = (m_colorIndices[i] + (int)(randNum * ((int)s_colorLookupTable.size() - 1))) % s_colorLookupTable.size();
+
 	}
 }
 
@@ -124,8 +124,13 @@ void LineDraw::LineDrawer::Draw() const
 	//for (Vector2 pt : s_lookupTable) {
 	//	DrawCircleV(pt, 2, RED);
 	//} // Draw Lookup Table
-
 	for (size_t i = 0; i < m_lineIndices.size(); i++) {
-		DrawLineEx(s_lookupTable[m_lineIndices[i].ptAIndex], s_lookupTable[m_lineIndices[i].ptBIndex], LINE_WIDTH, m_colors[i]);
+
+		Vector2 lineBegin = s_lookupTable[m_lineIndices[i].ptAIndex];
+		Vector2 lineEnd = s_lookupTable[m_lineIndices[i].ptBIndex];
+
+		Color color = s_colorLookupTable[m_colorIndices[i]];
+
+		DrawLineEx(lineBegin, lineEnd, LINE_WIDTH, color);
 	}
 }
