@@ -62,12 +62,13 @@ void LineDraw::LineDrawer::Mutate(float mutationRate)
 
 	for (size_t i = 0; i < m_lineIndices.size(); i++) {
 
-		m_lineIndices[i].ptAIndex = (m_lineIndices[i].ptAIndex + (int)(CIRCLE_RESOLUTION * GA_Cpp::GetRandom01())) % CIRCLE_RESOLUTION;
-		m_lineIndices[i].ptBIndex = (m_lineIndices[i].ptBIndex + (int)(CIRCLE_RESOLUTION * GA_Cpp::GetRandom01())) % CIRCLE_RESOLUTION;
+		if (GA_Cpp::GetRandom01() < mutationRate) {
+			m_lineIndices[i].ptAIndex = (m_lineIndices[i].ptAIndex + (int)(CIRCLE_RESOLUTION * GA_Cpp::GetRandom01())) % CIRCLE_RESOLUTION;
+			m_lineIndices[i].ptBIndex = (m_lineIndices[i].ptBIndex + (int)(CIRCLE_RESOLUTION * GA_Cpp::GetRandom01())) % CIRCLE_RESOLUTION;
 
-		float randNum = 2.0f * ((float)GA_Cpp::GetRandom01() - 0.5f);
-		m_colorIndices[i] = (m_colorIndices[i] + (int)(randNum * ((int)s_colorLookupTable.size() - 1))) % s_colorLookupTable.size();
-
+			float randNum = 2.0f * ((float)GA_Cpp::GetRandom01() - 0.5f);
+			m_colorIndices[i] = (m_colorIndices[i] + (int)(randNum * ((int)s_colorLookupTable.size() - 1))) % s_colorLookupTable.size();
+		}
 	}
 }
 
