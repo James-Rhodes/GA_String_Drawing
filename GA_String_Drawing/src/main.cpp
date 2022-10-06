@@ -24,7 +24,7 @@ extern "C"
 
 #define IMAGE_PATH "assets/stephanie-leblanc-JLMEZxBcXCU-unsplash.png"
 #define POPULATION_SIZE 2000
-#define MUTATION_RATE 0.05f
+#define MUTATION_RATE 0.1f
 
 Texture2D GenerateTextureToApproximate(const char* imagePath);
 
@@ -45,7 +45,7 @@ int main()
     ExportImage(imageToApproximate,"results/Expected_Output.png"); // Save the result we want the GA to Approximate
     UnloadImage(imageToApproximate);
 
-    Texture2D reducedPaletteTexture = CreateReducedColorPaletteTexture(textureToApproximate, 8);
+    Texture2D reducedPaletteTexture = CreateReducedColorPaletteTexture(textureToApproximate, 4);
     Image reducedPaletteImage = LoadImageFromTexture(reducedPaletteTexture);
     ExportImage(reducedPaletteImage, "results/Reduced_Palette_Image.png"); // Save the result we want the GA to Approximate
     UnloadImage(reducedPaletteImage);
@@ -72,8 +72,8 @@ int main()
     // Get Storage Buffer ID
     LineDraw::ssboFitnessDetails = rlLoadShaderBuffer(sizeof(LineDraw::FitnessDetails), NULL, RL_DYNAMIC_COPY);
 
-    GA_Cpp::GeneticAlgorithm<LineDraw::LineDrawer> ga(POPULATION_SIZE, MUTATION_RATE,50); // For Profiling
-    ga.SetPruneFrequency(8,10);
+    GA_Cpp::GeneticAlgorithm<LineDraw::LineDrawer> ga(POPULATION_SIZE, MUTATION_RATE,100); // For Profiling
+    ga.SetPruneFrequency(3,20);
     //// Main game loop
     while (!WindowShouldClose()) // Detect window close button or ESC key
     {
