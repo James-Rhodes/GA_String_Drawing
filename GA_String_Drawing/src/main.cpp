@@ -61,6 +61,7 @@ int main()
     EndTextureMode();
 
     int numIterations = 1;
+    int numLinesDrawn = NUM_LINES;
     ////--------------------------------------------------------------------------------------
 
     //Compile Compute Shader
@@ -89,6 +90,7 @@ int main()
             best.Draw();
             EndTextureMode();
             ga.InitAll();
+            numLinesDrawn += NUM_LINES;
         }
         //    //----------------------------------------------------------------------------------
         //    // Draw
@@ -102,6 +104,7 @@ int main()
 
         best.Draw();
 
+        DrawText(TextFormat("Lines Drawn: %d",numLinesDrawn),10,50,16,WHITE);
         DrawFPS(10, 10);
 
         EndDrawing();
