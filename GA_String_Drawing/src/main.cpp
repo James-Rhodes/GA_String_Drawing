@@ -73,7 +73,7 @@ int main()
     LineDraw::ssboFitnessDetails = rlLoadShaderBuffer(sizeof(LineDraw::FitnessDetails), NULL, RL_DYNAMIC_COPY);
 
     GA_Cpp::GeneticAlgorithm<LineDraw::LineDrawer> ga(POPULATION_SIZE, MUTATION_RATE,50); // For Profiling
-    ga.SetPruneFrequency(10,10);
+    ga.SetPruneFrequency(8,10);
     //// Main game loop
     while (!WindowShouldClose()) // Detect window close button or ESC key
     {
