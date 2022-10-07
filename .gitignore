@@ -43,4 +43,5 @@ bin-int/
 *.app
 
 GA_String_Drawing/results/*.png
+GA_String_Drawing/results/*.json
 !premake/premake5.exe

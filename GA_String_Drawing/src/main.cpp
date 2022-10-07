@@ -4,7 +4,7 @@
 #include "Dithering.h"
 #include <iostream>
 #include "rlgl.h"
-
+#include "Instrumentor.h"
 // Below ensures that the extra radeon GPU on my laptop gets used instead of the built in.
 // ----------------------------------------------------------------------
 #ifdef _WIN32
@@ -33,6 +33,9 @@ int main()
 {
     //// Initialization
     ////--------------------------------------------------------------------------------------
+#ifdef PROFILING
+    Instrumentor::Get().BeginSession("GA_String_Drawing", "./results/results.json");
+#endif
     const int screenWidth = 800;
     const int screenHeight = 480;
 
@@ -82,6 +85,9 @@ int main()
     {
         //    // Update
         //    //----------------------------------------------------------------------------------
+
+        PROFILE_SCOPE("Main_Loop");
+
         ga.Optimise();
 
         auto best = ga.GetBestResult();
@@ -131,7 +137,9 @@ int main()
         numIterations++;
         //    //----------------------------------------------------------------------------------
     }
-
+#ifdef PROFILING
+    Instrumentor::Get().EndSession();
+#endif
     //// De-Initialization
     ////--------------------------------------------------------------------------------------
     CloseWindow(); // Close window and OpenGL context

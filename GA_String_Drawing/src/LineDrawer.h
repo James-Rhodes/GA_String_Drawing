@@ -7,13 +7,22 @@
 #include "raylib.h"
 #include "rlgl.h"
 #include "Dithering.h"
+#include "Instrumentor.h"
 #define CIRCLE_RESOLUTION 256
 #define CIRCLE_RADIUS 200
 #define NUM_LINES 100
 #define BACKGROUND_COLOR BLACK
 #define LINE_WIDTH 2
 
-//#define PROFILING_FITNESS_FUNC 
+//#define PROFILING 1
+
+#if PROFILING
+#define PROFILE_SCOPE(name) InstrumentationTimer timer##__LINE__(name)
+#define PROFILE_FUNC() PROFILE_SCOPE(__FUNCTION__)
+#else
+#define PROFILE_SCOPE(name) 
+#define PROFILE_FUNC()
+#endif
 
 namespace LineDraw {
 
