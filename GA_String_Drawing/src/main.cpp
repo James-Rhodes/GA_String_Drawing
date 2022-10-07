@@ -25,7 +25,8 @@ extern "C"
 #define IMAGE_PATH "assets/stephanie-leblanc-JLMEZxBcXCU-unsplash.png"
 #define POPULATION_SIZE 2000
 #define MUTATION_RATE 0.1f
-
+#define NUM_ELITE 100
+#define ITERATIONS_UNTIL_SCREENSHOT 100
 Texture2D GenerateTextureToApproximate(const char* imagePath);
 
 int main()
@@ -60,8 +61,9 @@ int main()
     ClearBackground(BLACK); // Initialise current render with black screen
     EndTextureMode();
 
-    int numIterations = 1;
+    int numIterations = 0;
     int numLinesDrawn = NUM_LINES;
+    RenderTexture2D screenTexture = LoadRenderTexture(screenWidth, screenHeight); // Texture for screenshot
     ////--------------------------------------------------------------------------------------
 
     //Compile Compute Shader
@@ -73,7 +75,7 @@ int main()
     // Get Storage Buffer ID
     LineDraw::ssboFitnessDetails = rlLoadShaderBuffer(sizeof(LineDraw::FitnessDetails), NULL, RL_DYNAMIC_COPY);
 
-    GA_Cpp::GeneticAlgorithm<LineDraw::LineDrawer> ga(POPULATION_SIZE, MUTATION_RATE,100); // For Profiling
+    GA_Cpp::GeneticAlgorithm<LineDraw::LineDrawer> ga(POPULATION_SIZE, MUTATION_RATE,NUM_ELITE); // For Profiling
     ga.SetPruneFrequency(3,20);
     //// Main game loop
     while (!WindowShouldClose()) // Detect window close button or ESC key
@@ -85,18 +87,15 @@ int main()
         auto best = ga.GetBestResult();
         best.LogParameters();
 
-        if (numIterations % 25 == 0) {
+        if (numIterations % ITERATIONS_UNTIL_SCREENSHOT == 0 && numIterations != 0) {
             BeginTextureMode(LineDraw::currentRender);
             best.Draw();
             EndTextureMode();
             //ga.InitAll(); // Realised that reinitialising every single member of the population resulted in much worse performance because at a certain point the screen is filled up enough
             numLinesDrawn += NUM_LINES;
         }
-        //    //----------------------------------------------------------------------------------
-        //    // Draw
-        //    //----------------------------------------------------------------------------------
-        BeginDrawing();
 
+        BeginTextureMode(screenTexture);
         ClearBackground(BLACK);
 
         //DrawTextureRec(textureToApproximate, { 0,0,(float)textureToApproximate.width,-(float)textureToApproximate.height }, {0,0},WHITE);
@@ -104,10 +103,31 @@ int main()
 
         best.Draw();
 
-        DrawText(TextFormat("Lines Drawn: %d",numLinesDrawn),10,50,16,WHITE);
-        DrawFPS(10, 10);
+        DrawText(TextFormat("Lines Drawn: %d",numLinesDrawn),10,20,16,WHITE);
+        EndTextureMode();
+
+        //    //----------------------------------------------------------------------------------
+        //    // Draw
+        //    //----------------------------------------------------------------------------------
+        BeginDrawing();
+
+        DrawTextureRec(screenTexture.texture, { 0,0,(float)screenTexture.texture.width,-(float)screenTexture.texture.height }, { 0,0 }, WHITE);
 
         EndDrawing();
+
+        if (numIterations == 1 || numIterations % ITERATIONS_UNTIL_SCREENSHOT == 0 && numIterations != 0) {
+
+            // Saves screenshot of current progress
+            std::string fileTitle = "./results/Iteration_" + std::to_string(numIterations) + ".png";
+
+            Image screenShot = LoadImageFromTexture(screenTexture.texture);
+            ImageFlipVertical(&screenShot);
+
+            ExportImage(screenShot, fileTitle.c_str());
+
+            UnloadImage(screenShot);
+        }
+
         numIterations++;
         //    //----------------------------------------------------------------------------------
     }
