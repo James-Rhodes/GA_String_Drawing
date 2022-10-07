@@ -18,7 +18,8 @@ project "GA_String_Drawing"
    location("%{wks.location}/%{prj.name}")
 
    includedirs{
-      "%{wks.location}/vendor/Genetic_Algorithm_Cpp/Genetic_Algorithm_Cpp/include"
+      "%{wks.location}/vendor/Genetic_Algorithm_Cpp/Genetic_Algorithm_Cpp/include",
+      "%{wks.location}/vendor/The_Cherno_Instrumentor"
    }
    
    include_raylib()
