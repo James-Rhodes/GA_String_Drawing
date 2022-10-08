@@ -38,7 +38,7 @@ int main()
 #endif
     const int screenWidth = 800;
     const int screenHeight = 480;
-
+    SetConfigFlags(FLAG_MSAA_4X_HINT);
     InitWindow(screenWidth, screenHeight, "GA String Drawing");
     SetTargetFPS(60); // Set our game to run at 60 frames-per-second
     SetTraceLogLevel(LOG_NONE);
