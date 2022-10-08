@@ -12,6 +12,8 @@ unsigned int LineDraw::ssboFitnessDetails; // The buffer id that will contain th
 
 void LineDraw::LineDrawer::Init()
 {
+	PROFILE_FUNC();
+
 	if (s_lookupTable[0].x == 0 && s_lookupTable[0].y == 0) { 
 		// If the look up table hasn't been initialised then initialise it
 		std::cout << "Lookup Table Initialised" << std::endl;
@@ -38,6 +40,7 @@ void LineDraw::LineDrawer::Init()
 
 void LineDraw::LineDrawer::CrossOver(const LineDrawer& parentA, const LineDrawer& parentB)
 {
+	PROFILE_FUNC();
 	//size_t crossOverPoint = m_lineIndices.size() / 2; // Simple midpoint crossover
 	double t = parentA.fitness / (parentA.fitness + parentB.fitness);
 	size_t crossOverPoint = (size_t)std::lerp(0,m_lineIndices.size(),t);
@@ -59,6 +62,7 @@ void LineDraw::LineDrawer::CrossOver(const LineDrawer& parentA, const LineDrawer
 
 void LineDraw::LineDrawer::Mutate(float mutationRate)
 {
+	PROFILE_FUNC();
 
 	for (size_t i = 0; i < m_lineIndices.size(); i++) {
 
@@ -74,9 +78,8 @@ void LineDraw::LineDrawer::Mutate(float mutationRate)
 
 double LineDraw::LineDrawer::CalculateFitness()
 {
-#ifdef PROFILING_FITNESS_FUNC
-	auto beginDraw = std::chrono::high_resolution_clock::now();
-#endif
+	PROFILE_FUNC();
+
 	BeginTextureMode(LineDraw::intermediateRender);
 	ClearBackground(BACKGROUND_COLOR);
 
@@ -85,11 +88,7 @@ double LineDraw::LineDrawer::CalculateFitness()
 	Draw();
 
 	EndTextureMode();
-#ifdef PROFILING_FITNESS_FUNC
-	auto endDraw = std::chrono::high_resolution_clock::now();
 
-	auto beginShader = std::chrono::high_resolution_clock::now();
-#endif
 	LineDraw::FitnessDetails zeroDistance;
 	rlUpdateShaderBuffer(LineDraw::ssboFitnessDetails, &zeroDistance, sizeof(FitnessDetails), 0);
 
@@ -105,15 +104,7 @@ double LineDraw::LineDrawer::CalculateFitness()
 
 	LineDraw::FitnessDetails result;
 	rlReadShaderBuffer(LineDraw::ssboFitnessDetails, &result, sizeof(FitnessDetails), 0);
-#ifdef PROFILING_FITNESS_FUNC
-	auto endShader = std::chrono::high_resolution_clock::now();
-	auto drawTime = std::chrono::duration_cast<std::chrono::microseconds>(endDraw - beginDraw);
-	auto shaderTime = std::chrono::duration_cast<std::chrono::microseconds>(endShader - beginShader);
-	auto totalTime = std::chrono::duration_cast<std::chrono::microseconds>(endShader - beginDraw);
 
-
-	std::cout << "Draw Time: " << drawTime <<" Shader Time: "<< shaderTime<< " Total Time: " << totalTime<< std::endl;
-#endif
 	return std::exp(100000000/(float)result.distance);
 }
 
@@ -124,6 +115,7 @@ void LineDraw::LineDrawer::LogParameters() const
 
 void LineDraw::LineDrawer::Draw() const
 {
+	PROFILE_FUNC();
 	//for (Vector2 pt : s_lookupTable) {
 	//	DrawCircleV(pt, 2, RED);
 	//} // Draw Lookup Table
