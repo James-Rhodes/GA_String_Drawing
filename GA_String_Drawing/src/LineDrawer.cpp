@@ -93,18 +93,22 @@ double LineDraw::LineDrawer::CalculateFitness()
 	rlUpdateShaderBuffer(LineDraw::ssboFitnessDetails, &zeroDistance, sizeof(FitnessDetails), 0);
 
 	//Set Shader Uniforms (Textures)
-	rlEnableShader(LineDraw::computeShaderProgram);
+	{
+		PROFILE_SCOPE("Compute Shader Running");
+		rlEnableShader(LineDraw::computeShaderProgram);
 
-	rlBindImageTexture(LineDraw::intermediateRender.texture.id, 0, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8, true);
-	rlBindImageTexture(LineDraw::textureToApproximate.id, 1, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8, true);
-	rlBindShaderBuffer(LineDraw::ssboFitnessDetails, 2);
+		rlBindImageTexture(LineDraw::intermediateRender.texture.id, 0, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8, true);
+		rlBindImageTexture(LineDraw::textureToApproximate.id, 1, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8, true);
+		rlBindShaderBuffer(LineDraw::ssboFitnessDetails, 2);
 
-	rlComputeShaderDispatch(GetScreenWidth() / 16, GetScreenHeight() / 16, 1);
-	rlDisableShader();
-
+		rlComputeShaderDispatch(GetScreenWidth() / 16, GetScreenHeight() / 16, 1);
+		rlDisableShader();
+	}
 	LineDraw::FitnessDetails result;
-	rlReadShaderBuffer(LineDraw::ssboFitnessDetails, &result, sizeof(FitnessDetails), 0);
-
+	{
+		PROFILE_SCOPE("Reading Shader Buffer");
+		rlReadShaderBuffer(LineDraw::ssboFitnessDetails, &result, sizeof(FitnessDetails), 0);
+	}
 	return std::exp(100000000/(float)result.distance);
 }
 
