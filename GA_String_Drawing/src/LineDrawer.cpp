@@ -67,6 +67,7 @@ void LineDraw::LineDrawer::CrossOver(const LineDrawer& parentA, const LineDrawer
 	}
 	s_firstRun = false;
 	s_currFitnessIndex = 0;
+
 }
 
 void LineDraw::LineDrawer::Mutate(float mutationRate)
@@ -148,6 +149,7 @@ double LineDraw::LineDrawer::CalculateFitness()
 		//std::cout << s_maxFitnessCalculatedOn <<" , "<<s_currFitnessIndex << std::endl;
 		UpdateAllFitness(result); // Updates all of the fitnesses based on the formula below and the buffer received off the gpu
 		rlDisableShader();
+		s_currFitnessIndex = 0;
 	}
 
 	return 1.0;
