@@ -89,6 +89,7 @@ double LineDraw::LineDrawer::CalculateFitness()
 {
 	PROFILE_FUNC();
 
+
 	BeginTextureMode(LineDraw::intermediateRender);
 	ClearBackground(BACKGROUND_COLOR);
 
@@ -101,17 +102,21 @@ double LineDraw::LineDrawer::CalculateFitness()
 	// If it is the first member then initialise all of the distances to 0
 	bool isFirstFitnessCalculated = s_currFitnessIndex == 0;
 	if (isFirstFitnessCalculated) {
+		
+		PROFILE_SCOPE("Initialising SSBO");
+
 		LineDraw::FitnessDetails zeroDistance;
 		s_maxFitnessCalculatedOn = 0;
 		for (int i = 0; i < POPULATION_SIZE; i++) {
 			zeroDistance.distances[i] = 0;
 			if (!s_firstRun) {
-				s_maxFitnessCalculatedOn += (*populationPointer)[i].isElite ? 0:1;
+				s_maxFitnessCalculatedOn += (*populationPointer)[i].isElite ? 0 : 1;
 			}
 		}
 		rlEnableShader(LineDraw::computeShaderProgram);
 		rlUpdateShaderBuffer(LineDraw::ssboFitnessDetails, &zeroDistance, sizeof(FitnessDetails), 0);
 		rlDisableShader();
+		
 	}
 
 	//Set Shader Uniforms (Textures)

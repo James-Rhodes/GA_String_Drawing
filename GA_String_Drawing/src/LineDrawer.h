@@ -14,9 +14,10 @@
 #define BACKGROUND_COLOR BLACK
 #define LINE_WIDTH 2
 #define IMAGE_PATH "assets/stephanie-leblanc-JLMEZxBcXCU-unsplash.png"
-#define POPULATION_SIZE 2000
-#define MUTATION_RATE 0.1f
-#define NUM_ELITE 200
+#define POPULATION_SIZE 10
+//#define MUTATION_RATE 0.1f
+#define MUTATION_RATE 0.0f
+#define NUM_ELITE 5
 #define ITERATIONS_UNTIL_SCREENSHOT 100
 
 #define PROFILING 1
