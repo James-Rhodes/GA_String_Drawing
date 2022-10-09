@@ -9,9 +9,10 @@ layout(rgba8, binding = 1) uniform readonly image2D toApproximateImage;
 // Command buffer
 layout(std430, binding = 2) buffer FitnessLayout
 {
-	uint squaredDistance; // For storing the squared distance between the two images
+	uint squaredDistances[]; // For storing the squared distance between the two images
 }FitnessDetails;
 
+uniform int currentIndex;
 
 void main(){
 
@@ -22,6 +23,5 @@ void main(){
 	float dist = distance(srcPixel.rgb,destPixel.rgb);
 
 	highp uint result = uint(floor(dist));
-
-	atomicAdd(FitnessDetails.squaredDistance,result);
+	atomicAdd(FitnessDetails.squaredDistances[currentIndex],result);
 }

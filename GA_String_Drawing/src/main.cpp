@@ -22,11 +22,7 @@ extern "C"
 #endif
 // ---------------------------------------------------------------------
 
-#define IMAGE_PATH "assets/stephanie-leblanc-JLMEZxBcXCU-unsplash.png"
-#define POPULATION_SIZE 2000
-#define MUTATION_RATE 0.1f
-#define NUM_ELITE 100
-#define ITERATIONS_UNTIL_SCREENSHOT 100
+
 Texture2D GenerateTextureToApproximate(const char* imagePath);
 
 int main()
@@ -75,10 +71,13 @@ int main()
     LineDraw::computeShaderProgram = rlLoadComputeShaderProgram(computeShader);
     UnloadFileText(computeShaderCode);
 
+
+
     // Get Storage Buffer ID
     LineDraw::ssboFitnessDetails = rlLoadShaderBuffer(sizeof(LineDraw::FitnessDetails), NULL, RL_DYNAMIC_COPY);
 
     GA_Cpp::GeneticAlgorithm<LineDraw::LineDrawer> ga(POPULATION_SIZE, MUTATION_RATE,NUM_ELITE); // For Profiling
+    LineDraw::populationPointer = &ga.GetPopulationReference();
     ga.SetPruneFrequency(3,20);
     //// Main game loop
     while (!WindowShouldClose()) // Detect window close button or ESC key

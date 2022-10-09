@@ -3,17 +3,21 @@
 
 std::array<Vector2, CIRCLE_RESOLUTION> LineDraw::LineDrawer::s_lookupTable;
 std::vector<Color> LineDraw::LineDrawer::s_colorLookupTable;
-
+int LineDraw::LineDrawer::s_currFitnessIndex = 0;
 RenderTexture LineDraw::intermediateRender;
 RenderTexture LineDraw::currentRender;
 Texture2D LineDraw::textureToApproximate;
 unsigned int LineDraw::computeShaderProgram; // Compute Shader
 unsigned int LineDraw::ssboFitnessDetails; // The buffer id that will contain the fitness details.
+std::vector<LineDraw::LineDrawer>* LineDraw::populationPointer;
+int LineDraw::computeShaderCurrentIndexLoc;
+bool LineDraw::LineDrawer::s_firstRun;
+int LineDraw::LineDrawer::s_maxFitnessCalculatedOn = 0;
 
 void LineDraw::LineDrawer::Init()
 {
 	PROFILE_FUNC();
-
+	
 	if (s_lookupTable[0].x == 0 && s_lookupTable[0].y == 0) { 
 		// If the look up table hasn't been initialised then initialise it
 		std::cout << "Lookup Table Initialised" << std::endl;
@@ -24,8 +28,11 @@ void LineDraw::LineDrawer::Init()
 			s_lookupTable[i].x = CIRCLE_RADIUS * cos(angleDelta * i) + 0.5f * GetScreenWidth();
 			s_lookupTable[i].y = CIRCLE_RADIUS * sin(angleDelta * i) + 0.5f * GetScreenHeight();
 		}
-
+		rlEnableShader(LineDraw::computeShaderProgram);
+		LineDraw::computeShaderCurrentIndexLoc = rlGetLocationUniform(LineDraw::computeShaderProgram, "currentIndex");
+		rlDisableShader();
 		s_colorLookupTable = GetColorPalette(LineDraw::textureToApproximate);
+		s_firstRun = true;
 	}
 
 
@@ -58,6 +65,8 @@ void LineDraw::LineDrawer::CrossOver(const LineDrawer& parentA, const LineDrawer
 			m_colorIndices[i] = parentB.m_colorIndices[i];
 		}
 	}
+	s_firstRun = false;
+	s_currFitnessIndex = 0;
 }
 
 void LineDraw::LineDrawer::Mutate(float mutationRate)
@@ -89,27 +98,54 @@ double LineDraw::LineDrawer::CalculateFitness()
 
 	EndTextureMode();
 
-	LineDraw::FitnessDetails zeroDistance;
-	rlUpdateShaderBuffer(LineDraw::ssboFitnessDetails, &zeroDistance, sizeof(FitnessDetails), 0);
+	// If it is the first member then initialise all of the distances to 0
+	bool isFirstFitnessCalculated = s_currFitnessIndex == 0;
+	if (isFirstFitnessCalculated) {
+		LineDraw::FitnessDetails zeroDistance;
+		s_maxFitnessCalculatedOn = 0;
+		for (int i = 0; i < POPULATION_SIZE; i++) {
+			zeroDistance.distances[i] = 0;
+			if (!s_firstRun) {
+				s_maxFitnessCalculatedOn += (*populationPointer)[i].isElite ? 0:1;
+			}
+		}
+		rlEnableShader(LineDraw::computeShaderProgram);
+		rlUpdateShaderBuffer(LineDraw::ssboFitnessDetails, &zeroDistance, sizeof(FitnessDetails), 0);
+		rlDisableShader();
+	}
 
 	//Set Shader Uniforms (Textures)
 	{
 		PROFILE_SCOPE("Compute Shader Running");
 		rlEnableShader(LineDraw::computeShaderProgram);
 
+		rlSetUniform(computeShaderCurrentIndexLoc,&s_currFitnessIndex,RL_SHADER_UNIFORM_INT,1);
 		rlBindImageTexture(LineDraw::intermediateRender.texture.id, 0, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8, true);
 		rlBindImageTexture(LineDraw::textureToApproximate.id, 1, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8, true);
 		rlBindShaderBuffer(LineDraw::ssboFitnessDetails, 2);
-
 		rlComputeShaderDispatch(GetScreenWidth() / 16, GetScreenHeight() / 16, 1);
 		rlDisableShader();
 	}
-	LineDraw::FitnessDetails result;
-	{
+	s_currFitnessIndex++;
+
+	//If this is the last fitness being calculated then get the data from the buffer
+	bool isLastFitnessCalculated = (s_currFitnessIndex == s_maxFitnessCalculatedOn) && !s_firstRun;
+	if (isLastFitnessCalculated) {
+		LineDraw::FitnessDetails result;
 		PROFILE_SCOPE("Reading Shader Buffer");
+		rlEnableShader(LineDraw::computeShaderProgram);
 		rlReadShaderBuffer(LineDraw::ssboFitnessDetails, &result, sizeof(FitnessDetails), 0);
+		//std::cout << "Result: ";
+		//for (int i = 0; i < 10; i++) {
+		//	std::cout << result.distances[i]<<" , ";
+		//}
+		//std::cout << std::endl;
+		//std::cout << s_maxFitnessCalculatedOn <<" , "<<s_currFitnessIndex << std::endl;
+		UpdateAllFitness(result); // Updates all of the fitnesses based on the formula below and the buffer received off the gpu
+		rlDisableShader();
 	}
-	return std::exp(100000000/(float)result.distance);
+
+	return 1.0;
 }
 
 void LineDraw::LineDrawer::LogParameters() const
@@ -133,3 +169,21 @@ void LineDraw::LineDrawer::Draw() const
 		DrawLineEx(lineBegin, lineEnd, LINE_WIDTH, color);
 	}
 }
+
+void LineDraw::LineDrawer::UpdateAllFitness(const FitnessDetails& fitnessDetails) {
+
+	int currIndex = 0;
+	if (!s_firstRun) {
+		for (LineDrawer& drawer : *LineDraw::populationPointer) {
+			if (!drawer.isElite) {
+
+				// Go through the buffer and set the fitnesses of the population 
+				unsigned int distance = fitnessDetails.distances[currIndex];
+				drawer.fitness = std::exp(100000000 / (float)distance);				
+
+				currIndex++;
+			}
+		}
+	}
+}
+

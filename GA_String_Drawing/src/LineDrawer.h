@@ -13,6 +13,11 @@
 #define NUM_LINES 100
 #define BACKGROUND_COLOR BLACK
 #define LINE_WIDTH 2
+#define IMAGE_PATH "assets/stephanie-leblanc-JLMEZxBcXCU-unsplash.png"
+#define POPULATION_SIZE 2000
+#define MUTATION_RATE 0.1f
+#define NUM_ELITE 200
+#define ITERATIONS_UNTIL_SCREENSHOT 100
 
 #define PROFILING 1
 
@@ -33,14 +38,13 @@ namespace LineDraw {
     extern unsigned int computeShaderProgram; // Compute Shader
     extern unsigned int ssboFitnessDetails; // The buffer id that will contain the fitness details.
 
-
     struct LineIndices {
         int ptAIndex = -1;
         int ptBIndex = -1;
     };
 
     struct FitnessDetails {
-        unsigned int distance = 0;
+        unsigned int distances[POPULATION_SIZE];
     };
 
     class LineDrawer : public GA_Cpp::PopulationMember<LineDrawer> {
@@ -59,12 +63,26 @@ namespace LineDraw {
 
         void Draw() const;
 
+        void SetPopulationReference(std::vector<LineDrawer>* pointer);
+
+        void SetComputeShaderCurrentIndexLoc(int loc);
+
+        void UpdateAllFitness(const FitnessDetails& fitnessDetails);
+
 
     private:
         static std::array<Vector2, CIRCLE_RESOLUTION> s_lookupTable; // Look up for all LineDrawers for positions of lines
         static std::vector<Color> s_colorLookupTable; // Look up for all LineDrawers for colors of lines
+        static int s_currFitnessIndex; // For finding out how many fitness's were calculated in the SSBO
+        static bool s_firstRun;
+        static int s_maxFitnessCalculatedOn;
+
 
         std::array<int,NUM_LINES> m_colorIndices;
         std::array<LineIndices,NUM_LINES> m_lineIndices;
     };
+
+
+    extern std::vector<LineDrawer>* populationPointer;
+    extern int computeShaderCurrentIndexLoc;
 }
