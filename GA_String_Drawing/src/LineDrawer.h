@@ -75,11 +75,11 @@ namespace LineDraw {
         static std::array<Vector2, CIRCLE_RESOLUTION> s_lookupTable; // Look up for all LineDrawers for positions of lines
         static std::vector<Color> s_colorLookupTable; // Look up for all LineDrawers for colors of lines
         static int s_currFitnessIndex; // For finding out how many fitness's were calculated in the SSBO
-        static bool s_firstRun;
-        static int s_maxFitnessCalculatedOn;
+        static bool s_firstRun; // boolean to decide if it is the first run of the program
+        static int s_numFitnessCalculatedOn; // The number of members of the population that the fitness was calculated for (elite members don't have their fitness recalculated)
         static unsigned int s_computeShaderProgram; // Compute Shader
         static unsigned int s_ssboFitnessDetails; // The buffer id that will contain the fitness details. 
-        static int s_computeShaderCurrentIndexLoc;
+        static int s_computeShaderCurrentIndexLoc; // The loc of the current index that the fitness is being calculated for
 
 
         std::array<int,NUM_LINES> m_colorIndices;
