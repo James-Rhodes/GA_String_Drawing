@@ -7,8 +7,8 @@ int LineDraw::LineDrawer::s_currFitnessIndex = 0;
 RenderTexture LineDraw::intermediateRender;
 RenderTexture LineDraw::currentRender;
 Texture2D LineDraw::textureToApproximate;
-unsigned int LineDraw::computeShaderProgram; // Compute Shader
-unsigned int LineDraw::ssboFitnessDetails; // The buffer id that will contain the fitness details.
+unsigned int LineDraw::LineDrawer::computeShaderProgram; // Compute Shader
+unsigned int LineDraw::LineDrawer::ssboFitnessDetails; // The buffer id that will contain the fitness details.
 std::vector<LineDraw::LineDrawer>* LineDraw::populationPointer;
 int LineDraw::computeShaderCurrentIndexLoc;
 bool LineDraw::LineDrawer::s_firstRun;
@@ -19,20 +19,8 @@ void LineDraw::LineDrawer::Init()
 	PROFILE_FUNC();
 	
 	if (s_lookupTable[0].x == 0 && s_lookupTable[0].y == 0) { 
-		// If the look up table hasn't been initialised then initialise it
-		std::cout << "Lookup Table Initialised" << std::endl;
-
-		float angleDelta = 2 * PI / CIRCLE_RESOLUTION;
-
-		for (size_t i = 0; i < s_lookupTable.size(); i++) {
-			s_lookupTable[i].x = CIRCLE_RADIUS * cos(angleDelta * i) + 0.5f * GetScreenWidth();
-			s_lookupTable[i].y = CIRCLE_RADIUS * sin(angleDelta * i) + 0.5f * GetScreenHeight();
-		}
-		rlEnableShader(LineDraw::computeShaderProgram);
-		LineDraw::computeShaderCurrentIndexLoc = rlGetLocationUniform(LineDraw::computeShaderProgram, "currentIndex");
-		rlDisableShader();
-		s_colorLookupTable = GetColorPalette(LineDraw::textureToApproximate);
-		s_firstRun = true;
+		// If the look up table hasn't been initialised then all static variables need to be generated...
+		SetUpStaticVariables();
 	}
 
 
@@ -114,8 +102,8 @@ double LineDraw::LineDrawer::CalculateFitness()
 				s_maxFitnessCalculatedOn += (*populationPointer)[i].isElite ? 0 : 1;
 			}
 		}
-		rlEnableShader(LineDraw::computeShaderProgram);
-		rlUpdateShaderBuffer(LineDraw::ssboFitnessDetails, &zeroDistance, sizeof(FitnessDetails), 0);
+		rlEnableShader(LineDraw::LineDrawer::computeShaderProgram);
+		rlUpdateShaderBuffer(LineDraw::LineDrawer::ssboFitnessDetails, &zeroDistance, sizeof(FitnessDetails), 0);
 		rlDisableShader();
 		
 	}
@@ -123,12 +111,12 @@ double LineDraw::LineDrawer::CalculateFitness()
 	//Set Shader Uniforms (Textures)
 	{
 		PROFILE_SCOPE("Compute Shader Running");
-		rlEnableShader(LineDraw::computeShaderProgram);
+		rlEnableShader(LineDraw::LineDrawer::computeShaderProgram);
 
 		rlSetUniform(computeShaderCurrentIndexLoc,&s_currFitnessIndex,RL_SHADER_UNIFORM_INT,1);
 		rlBindImageTexture(LineDraw::intermediateRender.texture.id, 0, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8, true);
 		rlBindImageTexture(LineDraw::textureToApproximate.id, 1, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8, true);
-		rlBindShaderBuffer(LineDraw::ssboFitnessDetails, 2);
+		rlBindShaderBuffer(LineDraw::LineDrawer::ssboFitnessDetails, 2);
 		rlComputeShaderDispatch(GetScreenWidth() / 16, GetScreenHeight() / 16, 1);
 		rlDisableShader();
 	}
@@ -139,8 +127,8 @@ double LineDraw::LineDrawer::CalculateFitness()
 	if (isLastFitnessCalculated) {
 		LineDraw::FitnessDetails result;
 		PROFILE_SCOPE("Reading Shader Buffer");
-		rlEnableShader(LineDraw::computeShaderProgram);
-		rlReadShaderBuffer(LineDraw::ssboFitnessDetails, &result, sizeof(FitnessDetails), 0);
+		rlEnableShader(LineDraw::LineDrawer::computeShaderProgram);
+		rlReadShaderBuffer(LineDraw::LineDrawer::ssboFitnessDetails, &result, sizeof(FitnessDetails), 0);
 		//std::cout << "Result: ";
 		//for (int i = 0; i < 10; i++) {
 		//	std::cout << result.distances[i]<<" , ";
@@ -192,5 +180,33 @@ void LineDraw::LineDrawer::UpdateAllFitness(const FitnessDetails& fitnessDetails
 			}
 		}
 	}
+}
+
+void LineDraw::LineDrawer::SetUpStaticVariables() {
+	std::cout << "...Static Variables Initialised..." << std::endl;
+	SetUpComputeShader();
+	float angleDelta = 2 * PI / CIRCLE_RESOLUTION;
+
+	for (size_t i = 0; i < s_lookupTable.size(); i++) {
+		s_lookupTable[i].x = CIRCLE_RADIUS * cos(angleDelta * i) + 0.5f * GetScreenWidth();
+		s_lookupTable[i].y = CIRCLE_RADIUS * sin(angleDelta * i) + 0.5f * GetScreenHeight();
+	}
+	rlEnableShader(LineDraw::LineDrawer::computeShaderProgram);
+	LineDraw::computeShaderCurrentIndexLoc = rlGetLocationUniform(LineDraw::LineDrawer::computeShaderProgram, "currentIndex");
+	rlDisableShader();
+	s_colorLookupTable = GetColorPalette(LineDraw::textureToApproximate);
+	s_firstRun = true;
+
+}
+
+void LineDraw::LineDrawer::SetUpComputeShader() {
+	//Compile Compute Shader
+	char* computeShaderCode = LoadFileText("shaders/CalculateFitness_ComputeShader.glsl");
+	unsigned int computeShader = rlCompileShader(computeShaderCode, RL_COMPUTE_SHADER);
+	LineDraw::LineDrawer::computeShaderProgram = rlLoadComputeShaderProgram(computeShader);
+	UnloadFileText(computeShaderCode);
+
+	// Get Storage Buffer ID
+	LineDraw::LineDrawer::ssboFitnessDetails = rlLoadShaderBuffer(sizeof(LineDraw::FitnessDetails), NULL, RL_DYNAMIC_COPY);
 }
 

@@ -65,17 +65,6 @@ int main()
     RenderTexture2D screenTexture = LoadRenderTexture(screenWidth, screenHeight); // Texture for screenshot
     ////--------------------------------------------------------------------------------------
 
-    //Compile Compute Shader
-    char* computeShaderCode = LoadFileText("shaders/CalculateFitness_ComputeShader.glsl");
-    unsigned int computeShader = rlCompileShader(computeShaderCode, RL_COMPUTE_SHADER);
-    LineDraw::computeShaderProgram = rlLoadComputeShaderProgram(computeShader);
-    UnloadFileText(computeShaderCode);
-
-
-
-    // Get Storage Buffer ID
-    LineDraw::ssboFitnessDetails = rlLoadShaderBuffer(sizeof(LineDraw::FitnessDetails), NULL, RL_DYNAMIC_COPY);
-
     GA_Cpp::GeneticAlgorithm<LineDraw::LineDrawer> ga(POPULATION_SIZE, MUTATION_RATE,NUM_ELITE); // For Profiling
     LineDraw::populationPointer = &ga.GetPopulationReference();
     ga.SetPruneFrequency(3,20);

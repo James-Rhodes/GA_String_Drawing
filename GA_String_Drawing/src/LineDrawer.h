@@ -35,8 +35,7 @@ namespace LineDraw {
     extern RenderTexture2D currentRender;
     extern Texture2D textureToApproximate;
 
-    extern unsigned int computeShaderProgram; // Compute Shader
-    extern unsigned int ssboFitnessDetails; // The buffer id that will contain the fitness details.
+
 
     struct LineIndices {
         int ptAIndex = -1;
@@ -69,6 +68,10 @@ namespace LineDraw {
 
         void UpdateAllFitness(const FitnessDetails& fitnessDetails);
 
+        void SetUpStaticVariables();
+
+        void SetUpComputeShader();
+
 
     private:
         static std::array<Vector2, CIRCLE_RESOLUTION> s_lookupTable; // Look up for all LineDrawers for positions of lines
@@ -76,6 +79,8 @@ namespace LineDraw {
         static int s_currFitnessIndex; // For finding out how many fitness's were calculated in the SSBO
         static bool s_firstRun;
         static int s_maxFitnessCalculatedOn;
+        static unsigned int computeShaderProgram; // Compute Shader
+        static unsigned int ssboFitnessDetails; // The buffer id that will contain the fitness details. 
 
 
         std::array<int,NUM_LINES> m_colorIndices;
@@ -85,4 +90,9 @@ namespace LineDraw {
 
     extern std::vector<LineDrawer>* populationPointer;
     extern int computeShaderCurrentIndexLoc;
+
+    struct ComputeShaderGlobals {
+        int computeShaderCurrentIndexLoc;
+
+    };
 }
