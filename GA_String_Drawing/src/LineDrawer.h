@@ -79,8 +79,8 @@ namespace LineDraw {
         static int s_currFitnessIndex; // For finding out how many fitness's were calculated in the SSBO
         static bool s_firstRun;
         static int s_maxFitnessCalculatedOn;
-        static unsigned int computeShaderProgram; // Compute Shader
-        static unsigned int ssboFitnessDetails; // The buffer id that will contain the fitness details. 
+        static unsigned int s_computeShaderProgram; // Compute Shader
+        static unsigned int s_ssboFitnessDetails; // The buffer id that will contain the fitness details. 
 
 
         std::array<int,NUM_LINES> m_colorIndices;
