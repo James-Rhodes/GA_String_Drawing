@@ -47,7 +47,7 @@ int main()
     ////--------------------------------------------------------------------------------------
 
     GA_Cpp::GeneticAlgorithm<LineDraw::LineDrawer> ga(POPULATION_SIZE, MUTATION_RATE,NUM_ELITE,false); // For Profiling
-    LineDraw::LineDrawer::SetPopulationPointer(&ga.GetPopulationReference());
+    LineDraw::LineDrawer::SetPopulationPointer(&ga.GetPopulationReference()); // Set the population pointer before Initialising the population
     ga.Init();
     ga.SetPruneFrequency(3,20);
     //// Main game loop
