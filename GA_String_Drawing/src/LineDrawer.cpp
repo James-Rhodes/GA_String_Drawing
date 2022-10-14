@@ -210,3 +210,60 @@ void LineDraw::LineDrawer::SetUpComputeShader() {
 	LineDraw::LineDrawer::ssboFitnessDetails = rlLoadShaderBuffer(sizeof(LineDraw::FitnessDetails), NULL, RL_DYNAMIC_COPY);
 }
 
+void LineDraw::InitialiseTextures(const char* imagePath, const char* expectedOutputPath, const char* reducedColorPalettePath) {
+	Texture2D textureToApproximate = LineDraw::GenerateTextureToApproximate(IMAGE_PATH);
+	Image imageToApproximate = LoadImageFromTexture(textureToApproximate);
+	ImageFlipVertical(&imageToApproximate);
+	ExportImage(imageToApproximate, expectedOutputPath); // Save the result we want the GA to Approximate
+	UnloadImage(imageToApproximate);
+
+	Texture2D reducedPaletteTexture = CreateReducedColorPaletteTexture(textureToApproximate, 4);
+	Image reducedPaletteImage = LoadImageFromTexture(reducedPaletteTexture);
+	ExportImage(reducedPaletteImage, reducedColorPalettePath); // Save the result we want the GA to Approximate
+	UnloadImage(reducedPaletteImage);
+
+
+	LineDraw::textureToApproximate = reducedPaletteTexture;
+	LineDraw::intermediateRender = LoadRenderTexture(GetScreenWidth(), GetScreenHeight());
+	UnloadTexture(textureToApproximate);
+
+	LineDraw::currentRender = LoadRenderTexture(GetScreenWidth(), GetScreenHeight());
+	BeginTextureMode(LineDraw::currentRender);
+	ClearBackground(BLACK); // Initialise current render with black screen
+	EndTextureMode();
+}
+
+Texture2D LineDraw::GenerateTextureToApproximate(const char* imagePath) {
+	Image image = LoadImage(imagePath);
+	ImageFormat(&image, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
+	Texture2D texture = LoadTextureFromImage(image);
+
+	Vector2 texCoords[CIRCLE_RESOLUTION + 1];
+	Vector2 circlePoints[CIRCLE_RESOLUTION + 1];
+
+	int screenWidth = GetScreenWidth();
+	int screenHeight = GetScreenHeight();
+
+	RenderTexture2D renderTexture = LoadRenderTexture(screenWidth, screenHeight);
+
+
+	float angleDelta = 2 * PI / CIRCLE_RESOLUTION;
+	for (int i = 0; i < CIRCLE_RESOLUTION + 1; i++) {
+		texCoords[i].x = 0.5f * cos(-angleDelta * i) + 0.5f;
+		texCoords[i].y = 0.5f * sin(-angleDelta * i) + 0.5f;
+
+		circlePoints[i].x = CIRCLE_RADIUS * cos(-angleDelta * i);
+		circlePoints[i].y = CIRCLE_RADIUS * sin(-angleDelta * i);
+	}
+	BeginTextureMode(renderTexture);
+	ClearBackground(BLACK);
+	DrawTexturePoly(texture, { (float)screenWidth / 2,(float)screenHeight / 2 }, circlePoints, texCoords, CIRCLE_RESOLUTION + 1, WHITE);
+
+	EndTextureMode();
+
+	UnloadImage(image);
+	UnloadTexture(texture);
+
+	return renderTexture.texture;
+}
+

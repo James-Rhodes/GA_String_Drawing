@@ -23,7 +23,7 @@ extern "C"
 // ---------------------------------------------------------------------
 
 
-Texture2D GenerateTextureToApproximate(const char* imagePath);
+
 
 int main()
 {
@@ -39,26 +39,7 @@ int main()
     SetTargetFPS(60); // Set our game to run at 60 frames-per-second
     SetTraceLogLevel(LOG_NONE);
 
-    Texture2D textureToApproximate = GenerateTextureToApproximate(IMAGE_PATH);
-    Image imageToApproximate = LoadImageFromTexture(textureToApproximate);
-    ImageFlipVertical(&imageToApproximate);
-    ExportImage(imageToApproximate,"results/Expected_Output.png"); // Save the result we want the GA to Approximate
-    UnloadImage(imageToApproximate);
-
-    Texture2D reducedPaletteTexture = CreateReducedColorPaletteTexture(textureToApproximate, 4);
-    Image reducedPaletteImage = LoadImageFromTexture(reducedPaletteTexture);
-    ExportImage(reducedPaletteImage, "results/Reduced_Palette_Image.png"); // Save the result we want the GA to Approximate
-    UnloadImage(reducedPaletteImage);
-
-
-    LineDraw::textureToApproximate = reducedPaletteTexture;
-    LineDraw::intermediateRender = LoadRenderTexture(screenWidth,screenHeight);
-    UnloadTexture(textureToApproximate);
-
-    LineDraw::currentRender = LoadRenderTexture(screenWidth, screenHeight);
-    BeginTextureMode(LineDraw::currentRender);
-    ClearBackground(BLACK); // Initialise current render with black screen
-    EndTextureMode();
+    LineDraw::InitialiseTextures(IMAGE_PATH);
 
     int numIterations = 0;
     int numLinesDrawn = NUM_LINES;
@@ -136,36 +117,3 @@ int main()
     return 0;
 }
 
-Texture2D GenerateTextureToApproximate(const char* imagePath) {
-    Image image = LoadImage(imagePath);
-    ImageFormat(&image, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
-    Texture2D texture = LoadTextureFromImage(image);
-
-    Vector2 texCoords[CIRCLE_RESOLUTION + 1];
-    Vector2 circlePoints[CIRCLE_RESOLUTION + 1];
-
-    int screenWidth = GetScreenWidth();
-    int screenHeight = GetScreenHeight();
-
-    RenderTexture2D renderTexture = LoadRenderTexture(screenWidth, screenHeight);
-
-
-    float angleDelta = 2 * PI / CIRCLE_RESOLUTION;
-    for (int i = 0; i < CIRCLE_RESOLUTION + 1; i++) {
-        texCoords[i].x = 0.5f * cos(-angleDelta * i) + 0.5f;
-        texCoords[i].y = 0.5f * sin(-angleDelta * i) + 0.5f;
-
-        circlePoints[i].x = CIRCLE_RADIUS * cos(-angleDelta * i);
-        circlePoints[i].y = CIRCLE_RADIUS * sin(-angleDelta * i);
-    }
-    BeginTextureMode(renderTexture);
-    ClearBackground(BLACK);
-    DrawTexturePoly(texture, { (float)screenWidth / 2,(float)screenHeight / 2 }, circlePoints, texCoords, CIRCLE_RESOLUTION + 1, WHITE);
-
-    EndTextureMode();
-
-    UnloadImage(image);
-    UnloadTexture(texture);
-
-    return renderTexture.texture;
-}

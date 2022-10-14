@@ -91,8 +91,6 @@ namespace LineDraw {
     extern std::vector<LineDrawer>* populationPointer;
     extern int computeShaderCurrentIndexLoc;
 
-    struct ComputeShaderGlobals {
-        int computeShaderCurrentIndexLoc;
-
-    };
+    void InitialiseTextures(const char* imagePath, const char* expectedOutputPath = "results/Expected_Output.png", const char* reducedColorPalettePath = "results/Reduced_Palette_Image.png");
+    Texture2D GenerateTextureToApproximate(const char* imagePath);
 }
