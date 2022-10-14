@@ -70,6 +70,8 @@ namespace LineDraw {
 
         void SetUpComputeShader();
 
+        static void SetPopulationPointer(std::vector<LineDrawer>* pointer);
+
 
     private:
         static std::array<Vector2, CIRCLE_RESOLUTION> s_lookupTable; // Look up for all LineDrawers for positions of lines
@@ -80,6 +82,7 @@ namespace LineDraw {
         static unsigned int s_computeShaderProgram; // Compute Shader
         static unsigned int s_ssboFitnessDetails; // The buffer id that will contain the fitness details. 
         static int s_computeShaderCurrentIndexLoc; // The loc of the current index that the fitness is being calculated for
+        static std::vector<LineDrawer>* s_populationPointer; // A pointer to the array containing all of the members of the current ga population
 
 
         std::array<int,NUM_LINES> m_colorIndices;
@@ -87,7 +90,6 @@ namespace LineDraw {
     };
 
 
-    extern std::vector<LineDrawer>* populationPointer;
 
     void InitialiseTextures(const char* imagePath, const char* expectedOutputPath = "results/Expected_Output.png", const char* reducedColorPalettePath = "results/Reduced_Palette_Image.png");
     Texture2D GenerateTextureToApproximate(const char* imagePath);

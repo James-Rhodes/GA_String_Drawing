@@ -46,8 +46,9 @@ int main()
     RenderTexture2D screenTexture = LoadRenderTexture(screenWidth, screenHeight); // Texture for screenshot
     ////--------------------------------------------------------------------------------------
 
-    GA_Cpp::GeneticAlgorithm<LineDraw::LineDrawer> ga(POPULATION_SIZE, MUTATION_RATE,NUM_ELITE); // For Profiling
-    LineDraw::populationPointer = &ga.GetPopulationReference();
+    GA_Cpp::GeneticAlgorithm<LineDraw::LineDrawer> ga(POPULATION_SIZE, MUTATION_RATE,NUM_ELITE,false); // For Profiling
+    ga.Init();
+    LineDraw::LineDrawer::SetPopulationPointer(&ga.GetPopulationReference());
     ga.SetPruneFrequency(3,20);
     //// Main game loop
     while (!WindowShouldClose()) // Detect window close button or ESC key

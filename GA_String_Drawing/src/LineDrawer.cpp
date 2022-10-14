@@ -9,10 +9,10 @@ RenderTexture LineDraw::currentRender;
 Texture2D LineDraw::textureToApproximate;
 unsigned int LineDraw::LineDrawer::s_computeShaderProgram; // Compute Shader
 unsigned int LineDraw::LineDrawer::s_ssboFitnessDetails; // The buffer id that will contain the fitness details.
-std::vector<LineDraw::LineDrawer>* LineDraw::populationPointer;
+std::vector<LineDraw::LineDrawer>* LineDraw::LineDrawer::s_populationPointer;
 int LineDraw::LineDrawer::s_computeShaderCurrentIndexLoc;
 bool LineDraw::LineDrawer::s_firstRun;
-int LineDraw::LineDrawer::s_maxFitnessCalculatedOn = 0;
+int LineDraw::LineDrawer::s_numFitnessCalculatedOn = 0;
 
 void LineDraw::LineDrawer::Init()
 {
@@ -95,11 +95,11 @@ double LineDraw::LineDrawer::CalculateFitness()
 		PROFILE_SCOPE("Initialising SSBO");
 
 		LineDraw::FitnessDetails zeroDistance;
-		s_maxFitnessCalculatedOn = 0;
+		s_numFitnessCalculatedOn = 0;
 		for (int i = 0; i < POPULATION_SIZE; i++) {
 			zeroDistance.distances[i] = 0;
 			if (!s_firstRun) {
-				s_maxFitnessCalculatedOn += (*populationPointer)[i].isElite ? 0 : 1;
+				s_numFitnessCalculatedOn += (*s_populationPointer)[i].isElite ? 0 : 1;
 			}
 		}
 		rlEnableShader(LineDraw::LineDrawer::s_computeShaderProgram);
@@ -123,7 +123,7 @@ double LineDraw::LineDrawer::CalculateFitness()
 	s_currFitnessIndex++;
 
 	//If this is the last fitness being calculated then get the data from the buffer
-	bool isLastFitnessCalculated = (s_currFitnessIndex == s_maxFitnessCalculatedOn) && !s_firstRun;
+	bool isLastFitnessCalculated = (s_currFitnessIndex == s_numFitnessCalculatedOn) && !s_firstRun;
 	if (isLastFitnessCalculated) {
 		LineDraw::FitnessDetails result;
 		PROFILE_SCOPE("Reading Shader Buffer");
@@ -134,7 +134,7 @@ double LineDraw::LineDrawer::CalculateFitness()
 		//	std::cout << result.distances[i]<<" , ";
 		//}
 		//std::cout << std::endl;
-		//std::cout << s_maxFitnessCalculatedOn <<" , "<<s_currFitnessIndex << std::endl;
+		//std::cout << s_numFitnessCalculatedOn <<" , "<<s_currFitnessIndex << std::endl;
 		UpdateAllFitness(result); // Updates all of the fitnesses based on the formula below and the buffer received off the gpu
 		rlDisableShader();
 		s_currFitnessIndex = 0;
@@ -169,7 +169,7 @@ void LineDraw::LineDrawer::UpdateAllFitness(const FitnessDetails& fitnessDetails
 
 	int currIndex = 0;
 	if (!s_firstRun) {
-		for (LineDrawer& drawer : *LineDraw::populationPointer) {
+		for (LineDrawer& drawer : *LineDraw::LineDrawer::s_populationPointer) {
 			if (!drawer.isElite) {
 
 				// Go through the buffer and set the fitnesses of the population 
@@ -265,5 +265,9 @@ Texture2D LineDraw::GenerateTextureToApproximate(const char* imagePath) {
 	UnloadTexture(texture);
 
 	return renderTexture.texture;
+}
+
+void LineDraw::LineDrawer::SetPopulationPointer(std::vector<LineDrawer>* pointer) {
+	s_populationPointer = pointer;
 }
 
