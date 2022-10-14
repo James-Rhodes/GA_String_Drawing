@@ -67,14 +67,12 @@ int main()
             BeginTextureMode(LineDraw::currentRender);
             best.Draw();
             EndTextureMode();
-            //ga.InitAll(); // Realised that reinitialising every single member of the population resulted in much worse performance because at a certain point the screen is filled up enough
             numLinesDrawn += NUM_LINES;
         }
 
         BeginTextureMode(screenTexture);
         ClearBackground(BLACK);
 
-        //DrawTextureRec(textureToApproximate, { 0,0,(float)textureToApproximate.width,-(float)textureToApproximate.height }, {0,0},WHITE);
         DrawTextureRec(LineDraw::currentRender.texture, { 0,0,(float)LineDraw::currentRender.texture.width,(float)LineDraw::currentRender.texture.height }, {0,0},WHITE);
 
         best.Draw();
