@@ -22,12 +22,8 @@ extern "C"
 #endif
 // ---------------------------------------------------------------------
 
-#define IMAGE_PATH "assets/stephanie-leblanc-JLMEZxBcXCU-unsplash.png"
-#define POPULATION_SIZE 2000
-#define MUTATION_RATE 0.1f
-#define NUM_ELITE 100
-#define ITERATIONS_UNTIL_SCREENSHOT 100
-Texture2D GenerateTextureToApproximate(const char* imagePath);
+
+
 
 int main()
 {
@@ -43,42 +39,16 @@ int main()
     SetTargetFPS(60); // Set our game to run at 60 frames-per-second
     SetTraceLogLevel(LOG_NONE);
 
-    Texture2D textureToApproximate = GenerateTextureToApproximate(IMAGE_PATH);
-    Image imageToApproximate = LoadImageFromTexture(textureToApproximate);
-    ImageFlipVertical(&imageToApproximate);
-    ExportImage(imageToApproximate,"results/Expected_Output.png"); // Save the result we want the GA to Approximate
-    UnloadImage(imageToApproximate);
-
-    Texture2D reducedPaletteTexture = CreateReducedColorPaletteTexture(textureToApproximate, 4);
-    Image reducedPaletteImage = LoadImageFromTexture(reducedPaletteTexture);
-    ExportImage(reducedPaletteImage, "results/Reduced_Palette_Image.png"); // Save the result we want the GA to Approximate
-    UnloadImage(reducedPaletteImage);
-
-
-    LineDraw::textureToApproximate = reducedPaletteTexture;
-    LineDraw::intermediateRender = LoadRenderTexture(screenWidth,screenHeight);
-    UnloadTexture(textureToApproximate);
-
-    LineDraw::currentRender = LoadRenderTexture(screenWidth, screenHeight);
-    BeginTextureMode(LineDraw::currentRender);
-    ClearBackground(BLACK); // Initialise current render with black screen
-    EndTextureMode();
+    LineDraw::InitialiseTextures(IMAGE_PATH);
 
     int numIterations = 0;
     int numLinesDrawn = NUM_LINES;
     RenderTexture2D screenTexture = LoadRenderTexture(screenWidth, screenHeight); // Texture for screenshot
     ////--------------------------------------------------------------------------------------
 
-    //Compile Compute Shader
-    char* computeShaderCode = LoadFileText("shaders/CalculateFitness_ComputeShader.glsl");
-    unsigned int computeShader = rlCompileShader(computeShaderCode, RL_COMPUTE_SHADER);
-    LineDraw::computeShaderProgram = rlLoadComputeShaderProgram(computeShader);
-    UnloadFileText(computeShaderCode);
-
-    // Get Storage Buffer ID
-    LineDraw::ssboFitnessDetails = rlLoadShaderBuffer(sizeof(LineDraw::FitnessDetails), NULL, RL_DYNAMIC_COPY);
-
-    GA_Cpp::GeneticAlgorithm<LineDraw::LineDrawer> ga(POPULATION_SIZE, MUTATION_RATE,NUM_ELITE); // For Profiling
+    GA_Cpp::GeneticAlgorithm<LineDraw::LineDrawer> ga(POPULATION_SIZE, MUTATION_RATE,NUM_ELITE,false); // For Profiling
+    LineDraw::LineDrawer::SetPopulationPointer(&ga.GetPopulationReference()); // Set the population pointer before Initialising the population
+    ga.Init();
     ga.SetPruneFrequency(3,20);
     //// Main game loop
     while (!WindowShouldClose()) // Detect window close button or ESC key
@@ -97,14 +67,12 @@ int main()
             BeginTextureMode(LineDraw::currentRender);
             best.Draw();
             EndTextureMode();
-            //ga.InitAll(); // Realised that reinitialising every single member of the population resulted in much worse performance because at a certain point the screen is filled up enough
             numLinesDrawn += NUM_LINES;
         }
 
         BeginTextureMode(screenTexture);
         ClearBackground(BLACK);
 
-        //DrawTextureRec(textureToApproximate, { 0,0,(float)textureToApproximate.width,-(float)textureToApproximate.height }, {0,0},WHITE);
         DrawTextureRec(LineDraw::currentRender.texture, { 0,0,(float)LineDraw::currentRender.texture.width,(float)LineDraw::currentRender.texture.height }, {0,0},WHITE);
 
         best.Draw();
@@ -148,36 +116,3 @@ int main()
     return 0;
 }
 
-Texture2D GenerateTextureToApproximate(const char* imagePath) {
-    Image image = LoadImage(imagePath);
-    ImageFormat(&image, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
-    Texture2D texture = LoadTextureFromImage(image);
-
-    Vector2 texCoords[CIRCLE_RESOLUTION + 1];
-    Vector2 circlePoints[CIRCLE_RESOLUTION + 1];
-
-    int screenWidth = GetScreenWidth();
-    int screenHeight = GetScreenHeight();
-
-    RenderTexture2D renderTexture = LoadRenderTexture(screenWidth, screenHeight);
-
-
-    float angleDelta = 2 * PI / CIRCLE_RESOLUTION;
-    for (int i = 0; i < CIRCLE_RESOLUTION + 1; i++) {
-        texCoords[i].x = 0.5f * cos(-angleDelta * i) + 0.5f;
-        texCoords[i].y = 0.5f * sin(-angleDelta * i) + 0.5f;
-
-        circlePoints[i].x = CIRCLE_RADIUS * cos(-angleDelta * i);
-        circlePoints[i].y = CIRCLE_RADIUS * sin(-angleDelta * i);
-    }
-    BeginTextureMode(renderTexture);
-    ClearBackground(BLACK);
-    DrawTexturePoly(texture, { (float)screenWidth / 2,(float)screenHeight / 2 }, circlePoints, texCoords, CIRCLE_RESOLUTION + 1, WHITE);
-
-    EndTextureMode();
-
-    UnloadImage(image);
-    UnloadTexture(texture);
-
-    return renderTexture.texture;
-}
