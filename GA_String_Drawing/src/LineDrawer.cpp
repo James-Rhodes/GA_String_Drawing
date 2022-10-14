@@ -10,7 +10,7 @@ Texture2D LineDraw::textureToApproximate;
 unsigned int LineDraw::LineDrawer::s_computeShaderProgram; // Compute Shader
 unsigned int LineDraw::LineDrawer::s_ssboFitnessDetails; // The buffer id that will contain the fitness details.
 std::vector<LineDraw::LineDrawer>* LineDraw::populationPointer;
-int LineDraw::computeShaderCurrentIndexLoc;
+int LineDraw::LineDrawer::s_computeShaderCurrentIndexLoc;
 bool LineDraw::LineDrawer::s_firstRun;
 int LineDraw::LineDrawer::s_maxFitnessCalculatedOn = 0;
 
@@ -113,7 +113,7 @@ double LineDraw::LineDrawer::CalculateFitness()
 		PROFILE_SCOPE("Compute Shader Running");
 		rlEnableShader(LineDraw::LineDrawer::s_computeShaderProgram);
 
-		rlSetUniform(computeShaderCurrentIndexLoc,&s_currFitnessIndex,RL_SHADER_UNIFORM_INT,1);
+		rlSetUniform(s_computeShaderCurrentIndexLoc,&s_currFitnessIndex,RL_SHADER_UNIFORM_INT,1);
 		rlBindImageTexture(LineDraw::intermediateRender.texture.id, 0, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8, true);
 		rlBindImageTexture(LineDraw::textureToApproximate.id, 1, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8, true);
 		rlBindShaderBuffer(LineDraw::LineDrawer::s_ssboFitnessDetails, 2);
@@ -192,7 +192,7 @@ void LineDraw::LineDrawer::SetUpStaticVariables() {
 		s_lookupTable[i].y = CIRCLE_RADIUS * sin(angleDelta * i) + 0.5f * GetScreenHeight();
 	}
 	rlEnableShader(LineDraw::LineDrawer::s_computeShaderProgram);
-	LineDraw::computeShaderCurrentIndexLoc = rlGetLocationUniform(LineDraw::LineDrawer::s_computeShaderProgram, "currentIndex");
+	LineDraw::LineDrawer::s_computeShaderCurrentIndexLoc = rlGetLocationUniform(LineDraw::LineDrawer::s_computeShaderProgram, "currentIndex");
 	rlDisableShader();
 	s_colorLookupTable = GetColorPalette(LineDraw::textureToApproximate);
 	s_firstRun = true;

@@ -62,8 +62,6 @@ namespace LineDraw {
 
         void Draw() const;
 
-        void SetPopulationReference(std::vector<LineDrawer>* pointer);
-
         void SetComputeShaderCurrentIndexLoc(int loc);
 
         void UpdateAllFitness(const FitnessDetails& fitnessDetails);
@@ -81,6 +79,7 @@ namespace LineDraw {
         static int s_maxFitnessCalculatedOn;
         static unsigned int s_computeShaderProgram; // Compute Shader
         static unsigned int s_ssboFitnessDetails; // The buffer id that will contain the fitness details. 
+        static int s_computeShaderCurrentIndexLoc;
 
 
         std::array<int,NUM_LINES> m_colorIndices;
@@ -89,7 +88,6 @@ namespace LineDraw {
 
 
     extern std::vector<LineDrawer>* populationPointer;
-    extern int computeShaderCurrentIndexLoc;
 
     void InitialiseTextures(const char* imagePath, const char* expectedOutputPath = "results/Expected_Output.png", const char* reducedColorPalettePath = "results/Reduced_Palette_Image.png");
     Texture2D GenerateTextureToApproximate(const char* imagePath);
