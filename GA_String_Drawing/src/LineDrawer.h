@@ -31,9 +31,9 @@
 
 namespace LineDraw {
 
-    extern RenderTexture2D intermediateRender;
-    extern RenderTexture2D currentRender;
-    extern Texture2D textureToApproximate;
+    extern RenderTexture2D intermediateRender; // Used as a buffer between attempts of members of the population
+    extern RenderTexture2D currentRender; // The current effort of the GA
+    extern Texture2D textureToApproximate; // The texture we want to recreate with lines
 
 
 
